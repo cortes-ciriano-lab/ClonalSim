@@ -2,7 +2,7 @@ import numpy as np
 import abcpy
 import scipy.stats as stats
 
-class WrightFisherModelWithSelection:
+class MSIdyn:
     def __init__(self, N, generations, obs, epsilon, n_samples):
         self.N = N
         self.generations = generations
@@ -14,7 +14,7 @@ class WrightFisherModelWithSelection:
         """
         Generate summary statistics from the population.
         """
-        return np.mean(population) / 2
+        return np.mean(population)
 
     def generate_synthetic_data(self, params):
         """
