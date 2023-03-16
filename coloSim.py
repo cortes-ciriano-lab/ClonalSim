@@ -1,4 +1,5 @@
 import numpy as np
+import random
 import abcpy
 import scipy.stats as stats
 
@@ -7,10 +8,6 @@ import scipy.stats as stats
 ####################################################
 ## Simulate a Wright-Fisher Model with selection ###
 ####################################################
-
-# --- Libraries --- #
-import numpy as np
-import random
 
 
 class Cell:
