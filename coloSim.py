@@ -65,7 +65,7 @@ class PhyTree:
                     # connect to a random cell in the next generation
                     next_gen_indices = np.argwhere(next_gen == 1).flatten()
 
-                    #!# pseudo - googled code #!# 
+                    ### PSEUDO-CODE / Googled CODE ## 
                     if len(next_gen_indices) > 0:
                         next_gen_index = np.random.choice(next_gen_indices)
                         node1 = f"{i}_{j}"
@@ -112,7 +112,7 @@ def read_observed_data(observed):
     """
 
     return LTT_stat_obs
-    
+
 
 # Distance function between observed and synthetic data
 def distance_function():
@@ -127,6 +127,9 @@ def distance_function():
 def estimate_parameters(epsilon):
     """
     Estimate the parameters of the Wright-Fisher model with selection using the ABC algorithm.
+    
+    ### PSEUDO-CODE ####
+
     """
     s_prior = abcpy.Distribution(stats.uniform, 0, 2)
     model = abcpy.Model(generate_synthetic_data, [N, s_prior])
