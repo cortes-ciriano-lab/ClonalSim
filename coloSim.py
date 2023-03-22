@@ -106,7 +106,26 @@ def LTT_statistics(synth):
     Calculate the LTT statistics for simulated trees.
     """
     # read tree from tsv file
-    #
+    import treeswift
+
+    # Define the path to the TSV file containing the tree
+    tree_file = "path/to/tree.tsv"
+
+    # Load the tree from the TSV file
+    with open(tree_file) as f:
+        tree_str = f.read()
+    tree = treeswift.read_tree_newick(tree_str)
+
+    # Calculate lineage through time plot statistics
+    ltt = tree.lineage_through_time()
+
+    # Save the results in a data structure
+    results = {
+        "tree": tree,
+        "ltt": ltt,
+    }
+    print("Tree:", results["tree"])
+    print("LTT statistics:", results["ltt"])
 
 
 def read_observed_data(observed):
