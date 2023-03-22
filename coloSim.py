@@ -91,6 +91,8 @@ def simulate_population_and_tree(N, generations, mut_samples, s, mu):
     tree = PhyTree()
     tree.connect_random_cells(pop.generation_data)
     tree.assign_edge_lengths(mu)
+    # write phylogenetic tree to file
+    
     return tree
 
 
@@ -103,9 +105,10 @@ def LTT_statistics(synth):
     """
     Calculate the LTT statistics for simulated trees.
     """
-    
+    # read tree from tsv file
+    #
 
-# Distance function between observed and synthetic data
+
 def read_observed_data(observed):
     """
     Read observed tree and calculate LTT statistics and return or read in LTT statistics straight
