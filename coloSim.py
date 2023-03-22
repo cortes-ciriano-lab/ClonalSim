@@ -98,8 +98,6 @@ def simulate_population_and_tree(N, generations, mut_samples, s, mu):
 
 # ------------------------------------------- #
 
-
-
 # Calculate LTT stats from simulated data
 def LTT_statistics(synth):
     """
