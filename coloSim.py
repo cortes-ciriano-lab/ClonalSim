@@ -68,6 +68,7 @@ class PhyTree:
                     ### PSEUDO-CODE / Googled CODE ## 
                     if len(next_gen_indices) > 0:
                         next_gen_index = np.random.choice(next_gen_indices)
+                        
                         node1 = f"{i}_{j}"
                         node2 = f"{i+1}_{next_gen_index}"
                         self.add_edge(node1, node2)
@@ -158,12 +159,4 @@ def estimate_parameters(epsilon):
     results = sampler.sample(n_samples)
     s_estimates = results.get_parameters()[1]
     return np.mean(s_estimates)
-
-
-
-
-
-
-
-
         
