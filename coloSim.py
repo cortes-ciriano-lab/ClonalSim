@@ -56,22 +56,29 @@ class PhyTree:
         """
         Connects random cells of the generations in generation_data.
         """
-        num_generations = len(p1.generation_data)
-        for i in range(num_generations - 1):
-            curr_gen = p1.generation_data[i]
-            next_gen = p1.generation_data[i + 1]
-            for j in range(p1.N):
-                if curr_gen[j] == 1:
-                    # connect to a random cell in the next generation
-                    next_gen_indices = np.argwhere(next_gen == 1).flatten()
 
-                    ### PSEUDO-CODE / Googled CODE ## 
-                    if len(next_gen_indices) > 0:
-                        next_gen_index = np.random.choice(next_gen_indices)
-                        
-                        node1 = f"{i}_{j}"
-                        node2 = f"{i+1}_{next_gen_index}"
-                        self.add_edge(node1, node2)
+        # Initialize genealogy list where for each mutated cell I save the indexes of its randomly assigned genealogy
+        genealogy = []
+
+            if gen == self.generations[len(self.generations)]:
+                last_gen_indices = np.where(gen == 1)[0]
+                random_indices = np.random.choice(last_gen_indices, size=10)
+                for index in random_indices:
+                    curr_gen_index = index
+                    indices_list = [curr_gen_index]
+                    for prev_gen in range(gen - 1, -1, -1):
+                        prev_gen_indices = np.where(self.generation_data[prev_gen] == 1)[0]
+                        if len(prev_gen_indices) > 0:
+                            prev_gen_index = np.random.choice(prev_gen_indices)
+                            indices_list.append(prev_gen_index)
+                            curr_gen_index = prev_gen_index
+                        else:
+                            break
+                    genealogy.append(indices_list)
+
+                return genealogy
+
+
 
     def assign_edge_lengths(self, mu):
         """
@@ -104,6 +111,12 @@ def LTT_statistics(synth):
     """
     Calculate the LTT statistics for simulated trees.
     """
+
+
+def read_observed_data(observed):
+    """
+    Read observed tree and calculate LTT statistics and return or read in LTT statistics straight
+    """
     # read tree from tsv file
     import treeswift
 
@@ -125,15 +138,7 @@ def LTT_statistics(synth):
     }
     print("Tree:", results["tree"])
     print("LTT statistics:", results["ltt"])
-
-
-def read_observed_data(observed):
-    """
-    Read observed tree and calculate LTT statistics and return or read in LTT statistics straight
-    """
-
-    return LTT_stat_obs
-
+    return tree,ltt
 
 # Distance function between observed and synthetic data
 def distance_function():
