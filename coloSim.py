@@ -80,13 +80,13 @@ class PhyTree:
 
 
 
-    def assign_edge_lengths(self, mu):
-        """
-        Assigns a length in that edge between the nodes based on a Poisson distribution with mean rate μ.
-        """
-        for edge in self.graph.edges():
-            length = np.random.poisson(mu)
-            self.graph.edges[edge]["length"] = length
+def assign_edge_lengths(self, mu):
+    """
+    Assigns a length in that edge between the nodes based on a Poisson distribution with mean rate μ.
+    """
+    for edge in self.graph.edges():
+        length = np.random.poisson(mu)
+        self.graph.edges[edge]["length"] = length
 
 
 # ------------- Run Simulation ------------- #
