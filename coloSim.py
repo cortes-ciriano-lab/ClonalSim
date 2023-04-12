@@ -40,8 +40,6 @@ class Population:
 class Genealogia:
 
     def __init__(self):
-        self.graph = {}
-        self.node_labels = {}
 
     def connect_random_cells(self, generation_data):
         """
@@ -71,15 +69,19 @@ class Genealogia:
 
 
 
-# this will be a function going from a matrix to a dictionary of clades: to write
 def genealogy_to_cluster(genealogy):
+    """
+    this will be a function going from a matrix to a dictionary of clades: to write
+    """
     pass
-    
 
-# the following function goes from a nested dictionary of clades, creates the root node, adds node to that root 
-# and then establishes parent and children relationships
+
 
 def clusters_to_nodes(tree_clusters):
+    """
+    the following function goes from a nested dictionary of clades, creates the root node, adds node to that root 
+    and then establishes parent and children relationships    """
+    
     label_to_node = {cluster: Node(label=cluster) for cluster in tree_clusters}
 
     # Connect each node with it's leaves 
@@ -127,12 +129,15 @@ def assign_edge_lengths(self, mu, tree):
     """
     Iterate through the tree class and assign edge lengths based on a Poisson distribution with mean rate μ.
     """
-    mu = 1
-
     for node in tree.nodes():
         length = np.random.poisson(mu)
         node.set_edge_length(length)
 
+
+def LTT_statistics(synth):
+    """
+    Calculate the LTT statistics for simulated trees& write tree to newick
+    """
 
 
 # ------------- Run Simulation ------------- #
@@ -140,23 +145,18 @@ def assign_edge_lengths(self, mu, tree):
 # to add: for loop for multiple iterations & all simulations in list
 
 def simulate_population_and_tree(N, generations, mut_samples, s, mu):
-    pop = Population(N, generations, mut_samples, s)
-    pop.simulate_population({})
-    tree = PhyTree()
+    pop = Population(N, generations, mut_samples, s) # initiate population
+    gen = Genealogia() # initialise genealogy
+    gen_data.connect_random_cells(pop) # simulate expansion
+    tree_clusters=genealogy_to_cluster()
+    gen_tree = clusters_to_nodes(tree_clusters)
     tree.connect_random_cells(pop.generation_data)
     tree.assign_edge_lengths(mu)
-    # write phylogenetic tree to file
+
     
-    return tree
 
 
 # ------------------------------------------- #
-
-# Calculate LTT stats from simulated data
-def LTT_statistics(synth):
-    """
-    Calculate the LTT statistics for simulated trees.
-    """
 
 
 def read_observed_data(observed):
