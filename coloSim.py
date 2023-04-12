@@ -2,6 +2,8 @@ import numpy as np
 import random
 import abcpy
 import scipy.stats as stats
+import treeswift
+from treeswift import Tree, Node
 
 
 
@@ -25,7 +27,6 @@ class Population:
         """
         Simulate the population using the Wright-Fisher model with selection.
         """
-        # Initialize the first population
 
         # Initialize the first population
         population = np.zeros(self.N, dtype=int)
@@ -39,7 +40,8 @@ class Population:
 
 class Genealogia:
 
-    def __init__(self):
+    def __init__(self, generation_data ):
+        self.genealogy = []
 
     def connect_random_cells(self, generation_data):
         """
@@ -47,7 +49,6 @@ class Genealogia:
         """
 
         # Initialize genealogy list where for each mutated cell I save the indexes of its randomly assigned genealogy
-        genealogy = []
 
             if gen == self.generations[len(self.generations)]:
                 last_gen_indices = np.where(gen == 1)[0]
@@ -132,39 +133,12 @@ def assign_edge_lengths(self, mu, tree):
     for node in tree.nodes():
         length = np.random.poisson(mu)
         node.set_edge_length(length)
-
-
-def LTT_statistics(synth):
-    """
-    Calculate the LTT statistics for simulated trees& write tree to newick
-    """
-
-
-# ------------- Run Simulation ------------- #
-
-# to add: for loop for multiple iterations & all simulations in list
-
-def simulate_population_and_tree(N, generations, mut_samples, s, mu):
-    pop = Population(N, generations, mut_samples, s) # initiate population
-    gen = Genealogia() # initialise genealogy
-    gen_data.connect_random_cells(pop) # simulate expansion
-    tree_clusters=genealogy_to_cluster()
-    gen_tree = clusters_to_nodes(tree_clusters)
-    tree.connect_random_cells(pop.generation_data)
-    tree.assign_edge_lengths(mu)
-
-    
-
-
-# ------------------------------------------- #
-
+    return tree
 
 def read_observed_data(observed):
     """
     Read observed tree and calculate LTT statistics and return or read in LTT statistics straight
     """
-    # read tree from tsv file
-    import treeswift
 
     # Define the path to the TSV file containing the tree
     tree_file = "path/to/tree.tsv"
@@ -185,6 +159,33 @@ def read_observed_data(observed):
     print("Tree:", results["tree"])
     print("LTT statistics:", results["ltt"])
     return tree,ltt
+
+
+# ------------- Run Simulation ------------- #
+
+# to add: for loop for multiple iterations & all simulations in list
+
+def simulate_population_and_tree(N, generations, mut_samples, s, mu):
+    # initiate population
+    popul = Population(N, generations, mut_samples, s) 
+    # initialise genealogy
+    Gen = Genealogia() 
+    # connect all random mutated cells
+    Gen.connect_random_cells(popul) 
+    # from matrix go to tree_clusters dictionary
+    tree_clusters=genealogy_to_cluster(Gen.genealogy) 
+    # create phylo tree
+    gen_tree = clusters_to_nodes(tree_clusters)
+    # assign random edge (branch) lengths
+    gen_tree_expanded = assign_edge_lengths(gen_tree, mu)
+    # calculate ltt stats and plot using treeswift
+    ltt_gen_tree = gen_tree_expanded.lineages_through_time()
+    # write tree to newick txt file
+    gen_tree.write_tree_newick("output_gen_tree.tree.nwk", hide_rooted_prefix=True)
+
+
+
+# run ABC 
 
 # Distance function between observed and synthetic data
 def distance_function():
