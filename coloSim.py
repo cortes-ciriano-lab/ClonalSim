@@ -10,15 +10,6 @@ import scipy.stats as stats
 ####################################################
 
 
-# class Cell:
-#     def __init__(self, cell_type, position):
-#         self.type = cell_type
-#         self.position = position
-
-#     def __str__(self):
-#         return f"Cell type: {self.type}"
-
-
 class Population:
     def __init__(self, N, generations, mut_samples, s):
         self.N = N
@@ -46,7 +37,7 @@ class Population:
             self.generation_data.append(offspring)
             
 
-class PhyTree:
+class Genealogia:
 
     def __init__(self):
         self.graph = {}
@@ -80,13 +71,68 @@ class PhyTree:
 
 
 
-def assign_edge_lengths(self, mu):
+# this will be a function going from a matrix to a dictionary of clades: to write
+def genealogy_to_cluster(genealogy):
+    pass
+    
+
+# the following function goes from a nested dictionary of clades, creates the root node, adds node to that root 
+# and then establishes parent and children relationships
+
+def clusters_to_nodes(tree_clusters):
+    label_to_node = {cluster: Node(label=cluster) for cluster in tree_clusters}
+
+    # Connect each node with it's leaves 
+    for parent_label, leaf_labels in tree_clusters.items():
+        parent_node = label_to_node[parent_label]
+        for leaf_label in leaf_labels:
+            leaf_node = label_to_node[leaf_label]
+            parent_node.add_child(leaf_node)
+
+    # Connect each node with all descendants
+    for node1 in label_to_node.values():
+        for node2 in label_to_node.values():
+            if node1 == node2:
+                continue
+
+            possible_parent = node1 if len(node1.child_nodes()) > len(node2.child_nodes()) else node2
+            possible_child = node2 if possible_parent is node1 else node1
+            
+            parent_leaf_labels = {node.label for node in possible_parent.child_nodes()}
+            child_leaf_labels = {node.label for node in possible_child.child_nodes()}
+            is_descendant = child_leaf_labels.issubset(parent_leaf_labels)
+
+            if is_descendant and possible_child not in possible_parent.child_nodes() and possible_child.child_nodes():
+                possible_parent.add_child(possible_child)
+
+   # Remove non-direct descendants
+    next_nodes = {label_to_node["1"]}
+    while next_nodes:
+        node = next_nodes.pop()
+        for child in node.child_nodes():
+            next_nodes.add(child)
+            child.set_parent(node)
+            for grandchild in child.child_nodes():
+                if grandchild in node.child_nodes():
+                    node.remove_child(grandchild)
+
+    # Create the tree using TreeSwift
+    tree = Tree()
+    tree.root = label_to_node["1"]
+
+    return tree
+
+
+def assign_edge_lengths(self, mu, tree):
     """
-    Assigns a length in that edge between the nodes based on a Poisson distribution with mean rate μ.
+    Iterate through the tree class and assign edge lengths based on a Poisson distribution with mean rate μ.
     """
-    for edge in self.graph.edges():
+    mu = 1
+
+    for node in tree.nodes():
         length = np.random.poisson(mu)
-        self.graph.edges[edge]["length"] = length
+        node.set_edge_length(length)
+
 
 
 # ------------- Run Simulation ------------- #
