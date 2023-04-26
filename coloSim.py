@@ -76,6 +76,40 @@ def genealogy_to_cluster(genealogy):
     """
     pass
 
+def build_leaf_to_root_connections(tree_mask):
+    # List of each generation, where each generation is a dict from node_idx to set of leaves
+    node_to_leaves = []
+
+    # Initialize the list of generations
+    for generation_idx, generation in enumerate(tree_mask):
+        node_to_leaves.append({})
+        for node_idx, node in enumerate(generation):
+            if node == 1:
+                node_to_leaves[-1][node_idx] = set()
+
+    # Go backward from leaf to root, randomly assigning each leaf to a parent
+    for leaf_idx in node_to_leaves[-1].keys():
+        for generation_idx, generation in reversed(
+            list(enumerate(node_to_leaves[:-1]))
+        ):
+            parent_idx = random.choice(list(generation.keys()))
+            node_to_leaves[generation_idx][parent_idx].add(
+                (len(node_to_leaves) - 1, leaf_idx)
+            )
+
+    # Drop any non leaves that weren't connected
+    # Create a dict from node coordinates to leaf coordinates
+    result = {}
+    for generation_idx, generation in enumerate(node_to_leaves):
+        for node_idx, leaves in generation.items():
+            if generation_idx == len(node_to_leaves) - 1 or len(leaves) > 0:
+                result[str((generation_idx, node_idx))] = {str(leaf) for leaf in leaves}
+
+    return result
+
+
+if _name_ == "_main_":
+    build_leaf_to_root_connections(tree_mask)
 
 
 def clusters_to_nodes(tree_clusters):
