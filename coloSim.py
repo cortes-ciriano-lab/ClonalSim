@@ -23,7 +23,7 @@ class Population:
     def __str__(self):
         return f"Population size: {self.N}, Generations: {self.generations}, Mutant Samples: {self.mut_samples}"
 
-    def simulate_population(self, params):
+    def simulate_population(self):
         """
         Simulate the population using the Wright-Fisher model with selection.
         """
@@ -31,11 +31,32 @@ class Population:
         # Initialize the first population
         population = np.zeros(self.N, dtype=int)
         population[random.randint(0, self.N - 1)] = 1
-
+        self.generation_data.append(population)
+        #cancer_p_list  = []
+        #offspring_list = []
+        
         for gen in range(self.generations):
-            cancer_p = (1 + s) * n / (N + n * s)
-            offspring = np.random.binomial(n=1, p=cancer_p, size=N)
+            mut_n = len(np.where(self.generation_data[gen] == 1)[0])
+            cancer_p = (1 + self.s) * mut_n / (self.N + mut_n * self.s)
+            offspring = np.random.binomial(n=1, p=cancer_p, size=self.N)
             self.generation_data.append(offspring)
+            #cancer_p_list.append(cancer_p)
+            #offspring_list.append(offspring)
+        #return(self.generation_data)
+        # Plot the number of mutants over time
+        
+        # Count the number of individuals with a value of 1 in each generation
+        num_mutants = [np.count_nonzero(generation == 1) for generation in self.generation_data]
+        
+        # Plot the number of mutants over time
+        fig, ax = plt.subplots()
+        ax.plot(range(len(num_mutants)), num_mutants)
+        ax.set_xlabel("Generation")
+        ax.set_ylabel("Number of mutants")
+        ax.set_title("Mutant allele frequency over time")
+        plt.show()
+        
+        return(self.generation_data, fig)
             
 
 class Genealogia:
