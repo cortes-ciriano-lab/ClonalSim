@@ -11,7 +11,6 @@ from treeswift import Tree, Node
 ## Simulate a Wright-Fisher Model with selection ###
 ####################################################
 
-
 class Population:
     def __init__(self, N, generations, mut_samples, s):
         self.N = N
@@ -59,43 +58,7 @@ class Population:
         return(self.generation_data, fig)
             
 
-class Genealogia:
 
-    def __init__(self, generation_data ):
-        self.genealogy = []
-
-    def connect_random_cells(self, generation_data):
-        """
-        Connects random cells of the generations in generation_data.
-        """
-
-        # Initialize genealogy list where for each mutated cell I save the indexes of its randomly assigned genealogy
-
-            if gen == self.generations[len(self.generations)]:
-                last_gen_indices = np.where(gen == 1)[0]
-                random_indices = np.random.choice(last_gen_indices, size=10)
-                for index in random_indices:
-                    curr_gen_index = index
-                    indices_list = [curr_gen_index]
-                    for prev_gen in range(gen - 1, -1, -1):
-                        prev_gen_indices = np.where(self.generation_data[prev_gen] == 1)[0]
-                        if len(prev_gen_indices) > 0:
-                            prev_gen_index = np.random.choice(prev_gen_indices)
-                            indices_list.append(prev_gen_index)
-                            curr_gen_index = prev_gen_index
-                        else:
-                            break
-                    genealogy.append(indices_list)
-
-                return genealogy
-
-
-
-def genealogy_to_cluster(genealogy):
-    """
-    this will be a function going from a matrix to a dictionary of clades: to write
-    """
-    pass
 
 def build_leaf_to_root_connections(tree_mask):
     # List of each generation, where each generation is a dict from node_idx to set of leaves
