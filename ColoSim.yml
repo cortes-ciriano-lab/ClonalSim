@@ -1,0 +1,9 @@
+name: ColoSim
+channels:
+  - bioconda
+  - r
+  - defaults
+dependencies:
+  - matplotlib
+  - treeswift
+prefix: /Users/mkalyva/opt/miniconda3/envs/ColoSim
