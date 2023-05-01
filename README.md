@@ -32,11 +32,18 @@ conda activate ColoSim
 
 ```
 
-## Example Run 
+## Example Run for simulating data
 ```
 python3 coloSim.py --N 2000 --generations 20 --mut_samples 60 --s 1.3 --mu 100
 ```
 where N=population size, mu=mutation rate, mut_samples=number of mutant leaf nodes and s=fitness
+
+## Example Run for reading observed data
+```
+python3 coloSim.py --N 2000 --generations 20 --mut_samples 60 --s 1.3 --mu 100
+```
+
+
 ## Example Results of the Wright-Fisher model simulation
 
 #### Example Results with high fitness
@@ -53,10 +60,8 @@ where N=population size, mu=mutation rate, mut_samples=number of mutant leaf nod
 
 ## Authors
 
-Contributors names and contact info
-
-ex. Maria Kalyva
-ex. [@mkalyva] (https://twitter.com/mariakalyva1)
+Maria Kalyva
+[@mkalyva] (https://twitter.com/mariakalyva1)
 
 
 ## License
