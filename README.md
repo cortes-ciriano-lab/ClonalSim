@@ -35,9 +35,12 @@ python3 coloSim.py --N 2000 --generations 20 --mut_samples 60 --s 1.3 --mu 100
 ```
 where N=population size, mu=mutation rate, mut_samples=number of mutant leaf nodes and s=fitness
 
-## Example Run for reading observed data
+## Example Code for reading observed data, calculating summary LTT and plotting
 ```
-python3 coloSim.py --N 2000 --generations 20 --mut_samples 60 --s 1.3 --mu 100
+obs_tree = read_observed_data(obs_tree_path) # function that will read in the data to a tree class
+obs_tree.draw()
+normalise_tree_lengths(obs_tree) # normalise tree before LTT statistics
+obs_tree.ltt()
 ```
 
 
