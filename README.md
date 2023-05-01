@@ -24,8 +24,8 @@ Step 7: function that reads in the observed data in a treeswift tree and returns
 * all miniconda libraries can be installed with 
 
 ```
-conda env create -n ColoSim --file ColoSim.yml
-conda activate ColoSim
+conda env create -n ClonalSim --file ClonalSim.yml
+conda activate ClonalSim
 
 ```
 
