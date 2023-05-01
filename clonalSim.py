@@ -205,6 +205,18 @@ def assign_edge_lengths(mu, tree):
         node.set_edge_length(length)
     return tree
 
+def normalise_tree_lengths(tree):
+    current_gen = {tree.root}
+    while current_gen:
+        gen_lengths = {node.get_edge_length() for node in current_gen}
+        average_length = sum(gen_lengths) / len(gen_lengths)
+        next_gen = set()
+        for node in current_gen:
+            node.set_edge_length(average_length)
+            next_gen.update(node.child_nodes())
+        current_gen = next_gen
+
+
 def read_observed_data(observed_data_path):
     """
     Read observed tree and calculate LTT statistics and return or read in LTT statistics straight
@@ -247,6 +259,7 @@ def simulate_population_and_tree(N, generations, mut_samples, s, mu):
     phy_tree = read_tree_newick(tree_string)
     # assign random edge (branch) lengths
     phy_tree_mut = assign_edge_lengths(mu, phy_tree)
+    normalise_tree_lengths(phy_tree_mut)
     # calculate ltt stats and plot using treeswift
     ltt_gen_tree = phy_tree_mut.lineages_through_time()
     # write tree to newick txt file
@@ -270,20 +283,17 @@ results = []
 # call the function with the command-line arguments
 result = simulate_population_and_tree(N=args.N, generations=args.generations, mut_samples=args.mut_samples, s=args.s, mu=args.mu)
 
-obs = read_observed_data(ob)
-
 
 ##### ------------- Approximate Bayesian Criterion ----------------- #
-    """
-    Set Priors and run ABC analysis using abcpy
-    """
+"""
+Set Priors and run ABC analysis using abcpy
+"""
 
 ##### Distance function between observed and synthetic data
 def distance_function():
-    """
-    Calculate the distance between the observed and synthetic data.
-    """
-
+"""
+Calculate the distance between the observed and synthetic data.
+"""
     pass
 
 
