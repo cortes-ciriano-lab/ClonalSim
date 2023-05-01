@@ -34,8 +34,15 @@ conda activate ColoSim
 
 ## Example Results of the Wright-Fisher model simulation
 
-<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/" alt="MSI dynamics" width="20%">
+#### Example Results with high fitness
+<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_s_1.8.png" alt="Results tree with s=1.8" width="20%">
+<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_ltt_1.8.png" alt="Results tree with s=1.8" width="20%">
+<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_tree_1.8.png" alt="Results tree with s=1.8" width="20%">
 
+#### Example Results with low fitness
+<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_s_0.5.png" alt="Results tree with s=0.5" width="20%">
+<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_ltt_0.5.png" alt="Results tree with s=0.5" width="20%">
+<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_tree_0.5.png" alt="Results tree with s=0.5" width="20%">
 
 
 
