@@ -34,6 +34,8 @@ conda activate ColoSim
 
 ## Example Results of the Wright-Fisher model simulation
 
+<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/" alt="MSI dynamics" width="20%">
+
 
 
 
