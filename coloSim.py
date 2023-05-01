@@ -4,7 +4,20 @@ import random
 #import abcpy
 import treeswift
 from treeswift import Tree, Node
+import argparse
 
+# create an argparse parser
+parser = argparse.ArgumentParser(description="Simulate population and tree")
+
+# add arguments for the simulation parameters
+parser.add_argument("--N", type=int, help="population size")
+parser.add_argument("--generations", type=int, help="number of generations to simulate")
+parser.add_argument("--mut_samples", type=int, help="number of mutation samples")
+parser.add_argument("--s", type=float, help="selection coefficient")
+parser.add_argument("--mu", type=float, help="mutation rate")
+
+# parse the command-line arguments
+args = parser.parse_args()
 
 class Population:
     def __init__(self, N, generations, s):
@@ -240,18 +253,23 @@ def simulate_population_and_tree(N, generations, mut_samples, s, mu):
     return(phy_tree_mut.draw(),ltt_gen_tree)
     #gen_tree_expanded.write_tree_newick("output_gen_tree.tree.nwk", hide_rooted_prefix=True)
 
+
 # define a list of s values
-s_values = [0.3,0.5,1.4]
+# s_values = [0.3,0.5,1.4]
+# loop over the s values
+# for s in s_values:
+#     # call the function with the current s value
+#     result = simulate_population_and_tree(N=4000, generations=20, mut_samples=60, s=s, mu=100)
+#     # append the result to the list
+#     results.append(result)
+
 
 # initialize an empty list to store the results
 results = []
 
-# loop over the s values
-for s in s_values:
-    # call the function with the current s value
-    result = simulate_population_and_tree(N=4000, generations=20, mut_samples=60, s=s, mu=100)
-    # append the result to the list
-    results.append(result)
+# call the function with the command-line arguments
+result = simulate_population_and_tree(N=args.N, generations=args.generations, mut_samples=args.mut_samples, s=args.s, mu=args.mu)
+
 
 ##### ------------- Approximate Bayesian Criterion ----------------- #
     """
