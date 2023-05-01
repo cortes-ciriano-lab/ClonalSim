@@ -1,26 +1,20 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import random
-import abcpy
-import scipy.stats as stats
+#import abcpy
 import treeswift
 from treeswift import Tree, Node
 
 
-
-####################################################
-## Simulate a Wright-Fisher Model with selection ###
-####################################################
-
 class Population:
-    def __init__(self, N, generations, mut_samples, s):
+    def __init__(self, N, generations, s):
         self.N = N
         self.s = s
         self.generations = generations
-        self.mut_samples = mut_samples
         self.generation_data = []
 
     def __str__(self):
-        return f"Population size: {self.N}, Generations: {self.generations}, Mutant Samples: {self.mut_samples}"
+        return f"Population size: {self.N}, Generations: {self.generations}, Selection: {self.s}"
 
     def simulate_population(self):
         """
@@ -31,38 +25,57 @@ class Population:
         population = np.zeros(self.N, dtype=int)
         population[random.randint(0, self.N - 1)] = 1
         self.generation_data.append(population)
-        #cancer_p_list  = []
-        #offspring_list = []
+        binom_prob_list  = []
+        mut_n_list = []
         
         for gen in range(self.generations):
             mut_n = len(np.where(self.generation_data[gen] == 1)[0])
-            cancer_p = (1 + self.s) * mut_n / (self.N + mut_n * self.s)
+            mut_n_list.append(mut_n)
+            
+            cancer_p = (1 + self.s) * mut_n / (self.N + (mut_n * self.s))
+            binom_prob_list.append(cancer_p)
+                
             offspring = np.random.binomial(n=1, p=cancer_p, size=self.N)
+            
+            num_mutants = [np.count_nonzero(offspring == 1)]
+            
+            if num_mutants == 0:
+                print("Stochastic Extinction")
+                self.generation_data.append(offspring)
+                num_mutants = [np.count_nonzero(generation == 1) for generation in self.generation_data]
+                # Plot the number of mutants over time
+                fig, ax = plt.subplots()
+                ax.plot(range(len(num_mutants)), np.log(num_mutants))
+                ax.set_xlabel("Time in Generations")
+                ax.set_ylabel("Number of mutants ln(N)")
+                ax.set_title(f"Mutant allele frequency over time (s={self.s})")
+                plt.show()
+                return(self.generation_data, binom_prob_list, mut_n_list, fig) 
+            
             self.generation_data.append(offspring)
-            #cancer_p_list.append(cancer_p)
-            #offspring_list.append(offspring)
-        #return(self.generation_data)
+            
         # Plot the number of mutants over time
-        
         # Count the number of individuals with a value of 1 in each generation
         num_mutants = [np.count_nonzero(generation == 1) for generation in self.generation_data]
         
         # Plot the number of mutants over time
         fig, ax = plt.subplots()
-        ax.plot(range(len(num_mutants)), num_mutants)
-        ax.set_xlabel("Generation")
-        ax.set_ylabel("Number of mutants")
-        ax.set_title("Mutant allele frequency over time")
+        ax.plot(range(len(num_mutants)), np.log(num_mutants))
+        ax.set_xlabel("Time in Generations")
+        ax.set_ylabel("Number of mutants ln(N)")
+        ax.set_title(f"Mutant allele frequency over time (s={self.s})")
         plt.show()
         
-        return(self.generation_data, fig)
-            
+        return(self.generation_data, binom_prob_list, mut_n_list, fig) 
+    
 
-
-
-def build_leaf_to_root_connections(tree_mask):
+def build_leaf_to_root_connections(tree_mask, mut_samples):
+    """
+    Simulate the population using the Wright-Fisher model with selection.
+    """
     # List of each generation, where each generation is a dict from node_idx to set of leaves
     node_to_leaves = []
+    desired_number = mut_samples
 
     # Initialize the list of generations
     for generation_idx, generation in enumerate(tree_mask):
@@ -71,12 +84,37 @@ def build_leaf_to_root_connections(tree_mask):
             if node == 1:
                 node_to_leaves[-1][node_idx] = set()
 
+    assert desired_number <= len(node_to_leaves[-1])
+    node_to_leaves[-1] = {
+        id: set() 
+        for id in np.random.choice(
+            list(node_to_leaves[-1].keys()), 
+            desired_number, 
+            replace=False
+        )
+    }
+
     # Go backward from leaf to root, randomly assigning each leaf to a parent
     for leaf_idx in node_to_leaves[-1].keys():
+        leaf_to_follow = None
         for generation_idx, generation in reversed(
             list(enumerate(node_to_leaves[:-1]))
         ):
-            parent_idx = random.choice(list(generation.keys()))
+            # If we already have a leaf to follow, pick it's ancestor, otherwise pick a random one
+            if leaf_to_follow is not None:
+                parent_idx = next(
+                    node
+                    for node, leaves in generation.items()
+                    if leaf_to_follow in leaves
+                )
+            else:
+                parent_idx = random.choice(list(generation.keys()))
+
+            # If the parent already has a leaf, pick it's ancestor in all previous generations to avoid cycles
+            if len(node_to_leaves[generation_idx][parent_idx]) > 0:
+                leaf_to_follow = list(node_to_leaves[generation_idx][parent_idx])[0]
+
+            # Add the leaf to the parent
             node_to_leaves[generation_idx][parent_idx].add(
                 (len(node_to_leaves) - 1, leaf_idx)
             )
@@ -91,18 +129,14 @@ def build_leaf_to_root_connections(tree_mask):
 
     return result
 
-
-if _name_ == "_main_":
-    build_leaf_to_root_connections(tree_mask)
-
-
 def clusters_to_nodes(tree_clusters):
     """
     the following function goes from a nested dictionary of clades, creates the root node, adds node to that root 
     and then establishes parent and children relationships    """
     
     label_to_node = {cluster: Node(label=cluster) for cluster in tree_clusters}
-
+    root_name = list(tree_clusters.keys())[0]
+    
     # Connect each node with it's leaves 
     for parent_label, leaf_labels in tree_clusters.items():
         parent_node = label_to_node[parent_label]
@@ -116,6 +150,12 @@ def clusters_to_nodes(tree_clusters):
             if node1 == node2:
                 continue
 
+            node_1_gen = int(node1.label.split(',')[0][1:]) # split the key on comma, take the first element, and remove the opening parenthesis
+            node_2_gen = int(node2.label.split(',')[0][1:]) # split the key on comma, take the first element, and remove the opening parenthesis
+            
+            if abs(node_2_gen - node_1_gen) > 1 :
+                continue
+            
             possible_parent = node1 if len(node1.child_nodes()) > len(node2.child_nodes()) else node2
             possible_child = node2 if possible_parent is node1 else node1
             
@@ -126,8 +166,8 @@ def clusters_to_nodes(tree_clusters):
             if is_descendant and possible_child not in possible_parent.child_nodes() and possible_child.child_nodes():
                 possible_parent.add_child(possible_child)
 
-   # Remove non-direct descendants
-    next_nodes = {label_to_node["1"]}
+########  Remove non-direct descendants
+    next_nodes = {label_to_node[root_name]}
     while next_nodes:
         node = next_nodes.pop()
         for child in node.child_nodes():
@@ -139,35 +179,34 @@ def clusters_to_nodes(tree_clusters):
 
     # Create the tree using TreeSwift
     tree = Tree()
-    tree.root = label_to_node["1"]
+    tree.root = label_to_node[root_name]
 
     return tree
 
-
-def assign_edge_lengths(self, mu, tree):
+def assign_edge_lengths(mu, tree):
     """
     Iterate through the tree class and assign edge lengths based on a Poisson distribution with mean rate μ.
     """
-    for node in tree.nodes():
+    for node in tree.traverse_preorder():
         length = np.random.poisson(mu)
         node.set_edge_length(length)
     return tree
 
-def read_observed_data(observed):
+def read_observed_data(observed_data_path):
     """
     Read observed tree and calculate LTT statistics and return or read in LTT statistics straight
     """
 
-    # Define the path to the TSV file containing the tree
-    tree_file = "path/to/tree.tsv"
+    # Define the path to the file containing the tree
+    tree_file = observed_data_path
 
     # Load the tree from the TSV file
     with open(tree_file) as f:
         tree_str = f.read()
     tree = treeswift.read_tree_newick(tree_str)
-
+    
     # Calculate lineage through time plot statistics
-    ltt = tree.lineage_through_time()
+    ltt = tree.lineages_through_time()
 
     # Save the results in a data structure
     results = {
@@ -179,54 +218,60 @@ def read_observed_data(observed):
     return tree,ltt
 
 
-# ------------- Run Simulation ------------- #
-
-# to add: for loop for multiple iterations & all simulations in list
+##### ------------- Wright-Fisher Simulation ------------------------------ #
 
 def simulate_population_and_tree(N, generations, mut_samples, s, mu):
     # initiate population
-    popul = Population(N, generations, mut_samples, s) 
-    # initialise genealogy
-    Gen = Genealogia() 
-    # connect all random mutated cells
-    Gen.connect_random_cells(popul) 
-    # from matrix go to tree_clusters dictionary
-    tree_clusters=genealogy_to_cluster(Gen.genealogy) 
+    popul = Population(N, generations, s) 
+    # go from population array to tree_clusters dictionary
+    gen, _prob, _mut, _fig = popul.simulate_population()
+    # create genealogy and save in tree_clusters
+    tree_clusters = build_leaf_to_root_connections(gen, mut_samples)
     # create phylo tree
     gen_tree = clusters_to_nodes(tree_clusters)
+    from treeswift import read_tree_newick
+    tree_string = gen_tree.newick()
+    phy_tree = read_tree_newick(tree_string)
     # assign random edge (branch) lengths
-    gen_tree_expanded = assign_edge_lengths(gen_tree, mu)
+    phy_tree_mut = assign_edge_lengths(mu, phy_tree)
     # calculate ltt stats and plot using treeswift
-    ltt_gen_tree = gen_tree_expanded.lineages_through_time()
+    ltt_gen_tree = phy_tree_mut.lineages_through_time()
     # write tree to newick txt file
-    gen_tree.write_tree_newick("output_gen_tree.tree.nwk", hide_rooted_prefix=True)
+    return(phy_tree_mut.draw(),ltt_gen_tree)
+    #gen_tree_expanded.write_tree_newick("output_gen_tree.tree.nwk", hide_rooted_prefix=True)
 
 
+results = []
 
-# run ABC 
+for i in range(3):
+    # call the function
+    result = simulate_population_and_tree(N=2000, generations=20, mut_samples=60, s=1.3, mu=100)
+    # append the result to the list
+    results.append(result)
 
-# Distance function between observed and synthetic data
+
+    
+
+##### ------------- Approximate Bayesian Criterion ----------------- #
+    """
+    Set Priors and run ABC analysis using abcpy
+    """
+
+##### Distance function between observed and synthetic data
 def distance_function():
     """
     Calculate the distance between the observed and synthetic data.
     """
 
-    return np.abs(self.obs - synth)
+    pass
 
 
 
 def estimate_parameters(epsilon):
-    """
-    Estimate the parameters of the Wright-Fisher model with selection using the ABC algorithm.
+    # set priors
+    s_prior = abcpy.Distribution(stats.uniform, 0, 2) # selection
     
-    ### PSEUDO-CODE ####
-
-    """
-    s_prior = abcpy.Distribution(stats.uniform, 0, 2)
-    model = abcpy.Model(generate_synthetic_data, [N, s_prior])
-    data = abcpy.Data([obs], [distance_function])
-    sampler = abcpy.Sampler(model, data, epsilon=epsilon)
-    results = sampler.sample(n_samples)
-    s_estimates = results.get_parameters()[1]
-    return np.mean(s_estimates)
+    pass
         
+
+    
