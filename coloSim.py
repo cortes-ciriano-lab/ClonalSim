@@ -270,6 +270,8 @@ results = []
 # call the function with the command-line arguments
 result = simulate_population_and_tree(N=args.N, generations=args.generations, mut_samples=args.mut_samples, s=args.s, mu=args.mu)
 
+obs = read_observed_data(ob)
+
 
 ##### ------------- Approximate Bayesian Criterion ----------------- #
     """
