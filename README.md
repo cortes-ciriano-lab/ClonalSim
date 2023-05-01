@@ -2,7 +2,7 @@
 # Wright-Fisher with selection python simulator
 Use for the MSI evolution paper and thesis chapters. 
 
-<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/MSI_dynamics.jpg" alt="MSI dynamics" width="20%">
+<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/MSI_dynamics.jpg" alt="MSI dynamics" width="40%">
 
 ## Description of the code
 #### Master Simulator Function that includes running the following:
