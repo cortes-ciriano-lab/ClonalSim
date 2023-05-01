@@ -1,4 +1,4 @@
-![alt text](https://github.com/cortes-ciriano-lab/ColoSim/blob/main/MSI_dynamics.jpg alt="MSI dynamics" width="50%")
+<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/MSI_dynamics.jpg" alt="MSI dynamics" width="50%">
 
 # Wright-Fisher with selection python simulator
 
@@ -6,9 +6,6 @@ Use for the MSI evolution paper and thesis chapters.
 
 ## Description
 
-An in-depth paragraph about your project and overview of use.
-
-## Getting Started
 
 ### Dependencies
 
@@ -20,6 +17,10 @@ conda env create -n ColoSim --file ColoSim.yml
 conda activate ColoSim
 
 ```
+
+## Example Run of Wright-Fisher model simulation
+
+
 ## Authors
 
 Contributors names and contact info
