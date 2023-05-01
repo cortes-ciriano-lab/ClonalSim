@@ -1,5 +1,5 @@
 
-# ClonalSim: A python Wright-Fisher simulator for clonal expansions
+# ClonalSim: A Python Wright-Fisher simulator for clonal expansions
 Use for the MSI evolution paper and thesis chapters. 
 ## Description of the code
 #### Master Simulator Function that includes running the following:
