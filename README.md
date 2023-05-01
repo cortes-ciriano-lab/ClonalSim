@@ -1,9 +1,6 @@
 
-# Wright-Fisher with selection python simulator
+# ClonalSim: A python Wright-Fisher with selection simulator for clonal expansion
 Use for the MSI evolution paper and thesis chapters. 
-
-<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/MSI_dynamics.jpg" alt="MSI dynamics" width="40%">
-
 ## Description of the code
 #### Master Simulator Function that includes running the following:
 Step 1:  Python class that initiates a population class with features and a simulation method
