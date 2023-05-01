@@ -1,11 +1,20 @@
-<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/MSI_dynamics.jpg" alt="MSI dynamics" width="50%">
+<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/MSI_dynamics.jpg" alt="MSI dynamics" width="20%">
 
 # Wright-Fisher with selection python simulator
 
-Use for the MSI evolution paper and thesis chapters.
+Use for the MSI evolution paper and thesis chapters. 
 
-## Description
+## Description of the code
+# Master Simulator Function that includes running the following:
+Step 1:  initiate a population class with features and a simulation method
+Step 2:  run population simulation and return population, figure, probabilities used in each generation
+Step 3:  from a population array create a dictionary of clusters which represent clades of the tree
+Step 4:  function that takes in a population array, turns it in a network of nodes and then to a tree object 
+         compatible with the treeswift python package for further manipulaton in an efficient way
+Step 5:  function that assigns edge lengths to the simulated tree based on a Poisson distribution with mean μ
+Step 6:  calculation of Lineage Through Time plots and statistics for simulated tree
 
+Step 7: function that reads in the observed data in a treeswift tree and returns Lineage Through Time plots and statistics
 
 ### Dependencies
 
@@ -18,7 +27,7 @@ conda activate ColoSim
 
 ```
 
-## Example Run of Wright-Fisher model simulation
+## Example Results of the Wright-Fisher model simulation
 
 
 ## Authors
