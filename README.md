@@ -1,7 +1,4 @@
-# Colon_Simulator
-
-![alt text](https://github.com/cortes-ciriano-lab/ColoSim/blob/main/MSI_dynamics.jpg =250x250)
-
+![alt text](https://github.com/cortes-ciriano-lab/ColoSim/blob/main/MSI_dynamics.jpg alt="MSI dynamics" width="50%")
 
 # Wright-Fisher with selection python simulator
 
