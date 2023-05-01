@@ -240,17 +240,18 @@ def simulate_population_and_tree(N, generations, mut_samples, s, mu):
     return(phy_tree_mut.draw(),ltt_gen_tree)
     #gen_tree_expanded.write_tree_newick("output_gen_tree.tree.nwk", hide_rooted_prefix=True)
 
+# define a list of s values
+s_values = [0.3,0.5,1.4]
 
+# initialize an empty list to store the results
 results = []
 
-for i in range(3):
-    # call the function
-    result = simulate_population_and_tree(N=2000, generations=20, mut_samples=60, s=1.3, mu=100)
+# loop over the s values
+for s in s_values:
+    # call the function with the current s value
+    result = simulate_population_and_tree(N=4000, generations=20, mut_samples=60, s=s, mu=100)
     # append the result to the list
     results.append(result)
-
-
-    
 
 ##### ------------- Approximate Bayesian Criterion ----------------- #
     """
