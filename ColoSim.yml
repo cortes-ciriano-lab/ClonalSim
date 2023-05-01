@@ -6,4 +6,5 @@ channels:
 dependencies:
   - matplotlib
   - treeswift
+  - argparse
 prefix: /Users/mkalyva/opt/miniconda3/envs/ColoSim
