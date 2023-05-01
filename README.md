@@ -44,9 +44,9 @@ python3 coloSim.py --N 2000 --generations 20 --mut_samples 60 --s 1.3 --mu 100
 ## Example Results of the Wright-Fisher model simulation
 
 #### Example Results with high fitness
-<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_s_1.8.png" alt="Results tree with s=1.8" width="80%">
-<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_ltt_1.8.png" alt="Results tree with s=1.8" width="80%">
-<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_tree_1.8.png" alt="Results tree with s=1.8" width="80%">
+<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_s_1.4.png" alt="Results tree with s=1.8" width="80%">
+<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_ltt_1.4.png" alt="Results tree with s=1.8" width="80%">
+<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_tree_1.4.png" alt="Results tree with s=1.8" width="80%">
 
 #### Example Results with low fitness
 <img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_s_0.5.png" alt="Results tree with s=0.5" width="80%">
