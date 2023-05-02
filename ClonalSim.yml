@@ -1,4 +1,4 @@
-name: ColoSim
+name: ClonalSim
 channels:
   - bioconda
   - r
@@ -8,4 +8,4 @@ dependencies:
   - treeswift
   - argparse
   - csv
-prefix: /Users/mkalyva/opt/miniconda3/envs/ColoSim
+prefix: /Users/mkalyva/opt/miniconda3/envs/ClonalSim
