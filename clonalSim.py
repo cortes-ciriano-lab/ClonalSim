@@ -252,13 +252,13 @@ def read_observed_data(observed_data_path):
 
 ##### ------------- Wright-Fisher Simulation ------------------------------ #
 
-def simulate_population_and_tree(N, generations, mut_samples, s, mu, output_path):
+def simulate_population_and_tree(N, generations, mut_samples, s, mu, output_path, sim_number):
     print("Simulating population...")
     # initiate population
     popul = Population(N, generations, s) 
     # go from population array to tree_clusters dictionary
     gen, prob, mut, fig = popul.simulate_population()
-    fig.savefig(f"{output_path}/Simulation_with_mutants_in_time_(s={s}).png")
+    fig.savefig(f"{output_path}/Simulation_{sim_number}_with_mutants_in_time_(s={s}).png")
     print("Population Done...")
     # create genealogy and save in tree_clusters
     print("Simulating Genealogy...")
@@ -271,7 +271,7 @@ def simulate_population_and_tree(N, generations, mut_samples, s, mu, output_path
     # read newick tree
     print("Tree Saved")
     phy_tree = read_tree_newick(tree_string)
-    phy_tree.write_tree_newick(f"{output_path}/output_gen_tree.nwk", hide_rooted_prefix=True)
+    phy_tree.write_tree_newick(f"{output_path}/Simulation_{sim_number}_output_gen_tree.nwk", hide_rooted_prefix=True)
     # assign random edge (branch) lengths
     phy_tree_mut = assign_edge_lengths(mu, phy_tree)
     # visualise tree
@@ -284,7 +284,7 @@ def simulate_population_and_tree(N, generations, mut_samples, s, mu, output_path
     print("LTT Statistics calculating...")
     #ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=True, export_filename=f"{output_path}/Plot_ltt(s={s}).png")
     ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=False)
-    with open(f"{output_path}/ltt_gen_tree.tsv", "w", newline='') as f:
+    with open(f"{output_path}/Simulation_{sim_number}_ltt_gen_tree.tsv", "w", newline='') as f:
         writer = csv.writer(f, delimiter='\t')
         for key, value in ltt_gen_tree.items():
             writer.writerow([key, value])
@@ -301,7 +301,7 @@ def run_simulation_with_restart(sim_number):
     while num_retries <= sim_number:
         print(num_retries)
         try:
-            result = simulate_population_and_tree(N=args.N, generations=args.generations, mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path)
+            result = simulate_population_and_tree(N=args.N, generations=args.generations, mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, sim_number=args.sim_number)
             results.append(result)
             num_retries += 1
         except AssertionError:
