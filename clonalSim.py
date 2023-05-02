@@ -5,6 +5,7 @@ import random
 import treeswift
 from treeswift import Tree, Node
 import argparse
+import csv
 
 # create an argparse parser
 parser = argparse.ArgumentParser(description="Simulate population and tree")
@@ -80,7 +81,7 @@ class Population:
         ax.set_xlabel("Time in Generations")
         ax.set_ylabel("Number of mutants ln(N)")
         ax.set_title(f"Mutant allele frequency over time (s={self.s})")
-        plt.show()
+        #plt.show()
         
         return(self.generation_data, binom_prob_list, mut_n_list, fig) 
     
@@ -252,32 +253,45 @@ def read_observed_data(observed_data_path):
 ##### ------------- Wright-Fisher Simulation ------------------------------ #
 
 def simulate_population_and_tree(N, generations, mut_samples, s, mu, output_path):
+    print("Simulating population...")
     # initiate population
     popul = Population(N, generations, s) 
     # go from population array to tree_clusters dictionary
-    gen, _prob, _mut, _fig = popul.simulate_population()
+    gen, prob, mut, fig = popul.simulate_population()
     fig.savefig(f"{output_path}/Simulation_with_mutants_in_time_(s={s}).png")
+    print("Population Done...")
     # create genealogy and save in tree_clusters
+    print("Simulating Genealogy...")
     tree_clusters = build_leaf_to_root_connections(gen, mut_samples)
     # create phylo tree
     gen_tree = clusters_to_nodes(tree_clusters)
     from treeswift import read_tree_newick
     tree_string = gen_tree.newick()
+    print("Tree Done")
     # read newick tree
+    print("Tree Saved")
     phy_tree = read_tree_newick(tree_string)
+    phy_tree.write_tree_newick(f"{output_path}/output_gen_tree.nwk", hide_rooted_prefix=True)
     # assign random edge (branch) lengths
     phy_tree_mut = assign_edge_lengths(mu, phy_tree)
     # visualise tree
-    import matplotlib.patches as patches
-    white_patch = patches.Patch(color='black', label=f"Phylogenetic tree (s={s})")
-    plot = phy_tree_mut.draw(show_labels=False, handles=[white_patch])
+    #import matplotlib.patches as patches
+    #plot = phy_tree_mut.draw(show_labels=False, handles=[white_patch])
+    #white_patch = patches.Patch(color='black', label=f"Phylogenetic tree (s={s})")
     #plot.savefig(f"Simulation_{num_retries}_(s={s})_tree.png")
     #normalise_tree_lengths(phy_tree_mut)
     # calculate ltt stats and plot using treeswift
-    ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=True, export_filename=f"{output_path}/Plot_ltt(s={s}).png")
-    # write tree to newick txt file
+    print("LTT Statistics calculating...")
+    #ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=True, export_filename=f"{output_path}/Plot_ltt(s={s}).png")
+    ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=False)
+    with open(f"{output_path}/ltt_gen_tree.tsv", "w", newline='') as f:
+        writer = csv.writer(f, delimiter='\t')
+        for key, value in ltt_gen_tree.items():
+            writer.writerow([key, value])
+    
+    print("LTT Statistics Done")
+
     return phy_tree , ltt_gen_tree
-    #gen_tree_expanded.write_tree_newick("output_gen_tree.tree.nwk", hide_rooted_prefix=True)
 
 # initialize an empty list to store the results
 results = []
@@ -285,9 +299,11 @@ results = []
 def run_simulation_with_restart(sim_number):
     num_retries = 0
     while num_retries <= sim_number:
+        print(num_retries)
         try:
             result = simulate_population_and_tree(N=args.N, generations=args.generations, mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path)
             results.append(result)
+            num_retries += 1
         except AssertionError:
             num_retries += 1
             print("AssertionError occurred, restarting simulation...")
