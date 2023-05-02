@@ -45,7 +45,7 @@ conda activate ClonalSim
 ```
 python clonalSim.py --N 2000 --generations 20 --mut_samples 60 --s 1.3 --mu 100  --sim_number 4
 ```
-where N=population size, mu=mutation rate, mut_samples=number of mutant leaf nodes and s=fitness
+where N=population size, mu=mutation rate, mut_samples=number of mutant leaf nodes, s=fitness and sim_number is the number of simulations
 
 ## Example Code for reading observed data, calculating summary LTT and plotting
 ```
