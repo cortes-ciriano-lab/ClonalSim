@@ -15,6 +15,8 @@ parser.add_argument("--generations", type=int, help="number of generations to si
 parser.add_argument("--mut_samples", type=int, help="number of mutation samples")
 parser.add_argument("--s", type=float, help="selection coefficient")
 parser.add_argument("--mu", type=float, help="mutation rate")
+parser.add_argument("--sim_number", type=float, help="The number of simulations to run")
+
 
 # parse the command-line arguments
 args = parser.parse_args()
@@ -253,6 +255,7 @@ def simulate_population_and_tree(N, generations, mut_samples, s, mu):
     popul = Population(N, generations, s) 
     # go from population array to tree_clusters dictionary
     gen, _prob, _mut, _fig = popul.simulate_population()
+    fig.savefig(f"Simulation_{num_retries}_(s={s})_mutants_in_time.png")
     # create genealogy and save in tree_clusters
     tree_clusters = build_leaf_to_root_connections(gen, mut_samples)
     # create phylo tree
@@ -267,9 +270,11 @@ def simulate_population_and_tree(N, generations, mut_samples, s, mu):
     import matplotlib.patches as patches
     white_patch = patches.Patch(color='black', label=f"Phylogenetic tree (s={s})")
     plot = phy_tree_mut.draw(show_labels=False, handles=[white_patch])
+    plot.savefig(f"Simulation_{num_retries}_(s={s})_tree.png")
     #normalise_tree_lengths(phy_tree_mut)
     # calculate ltt stats and plot using treeswift
     ltt_gen_tree = phy_tree_mut.lineages_through_time()
+    ltt_gen_tree.savefig(f"Simulation_{num_retries}_(s={s})_ltt.png")
     # write tree to newick txt file
     return(plot,ltt_gen_tree)
     #gen_tree_expanded.write_tree_newick("output_gen_tree.tree.nwk", hide_rooted_prefix=True)
@@ -279,15 +284,17 @@ results = []
 
 def run_simulation_with_restart():
     num_retries = 0
-    while num_retries <= 2:
+    while num_retries <= sim_number:
         try:
-            result = simulate_population_and_tree(N=args.N, generations=args.generations, mut_samples=args.mut_samples, s=args.s, mu=args.mu)
+            result = simulate_population_and_tree(N=args.N, generations=args.generations, mut_samples=args.mut_samples, s=args.s, mu=args.mu, sim_number=args.sim_number)
             results.append(result)
         except AssertionError:
             num_retries += 1
             print("AssertionError occurred, restarting simulation...")
 
 run_simulation_with_restart()
+
+
 # call the function with the command-line arguments
 #result = simulate_population_and_tree(N=args.N, generations=args.generations, mut_samples=args.mut_samples, s=args.s, mu=args.mu)
 
