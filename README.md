@@ -62,12 +62,13 @@ obs_tree.ltt()
 <img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_s_1.4.png" alt="Results tree with s=1.8" width="80%">
 <img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_ltt_1.4.png" alt="Results tree with s=1.8" width="80%">
 <img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_tree_1.4.png" alt="Results tree with s=1.8" width="80%">
+<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_avg_tree_1.4.png" alt="Results tree with s=1.8" width="80%">
 
 #### Example Results with low fitness
 <img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_s_0.5.png" alt="Results tree with s=0.5" width="80%">
 <img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_ltt_0.5.png" alt="Results tree with s=0.5" width="80%">
 <img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_tree_0.5.png" alt="Results tree with s=0.5" width="80%">
-
+<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_avg_tree_0.5.png" alt="Results tree with s=0.5" width="80%">
 
 
 ## Authors
