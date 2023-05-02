@@ -269,17 +269,6 @@ def simulate_population_and_tree(N, generations, mut_samples, s, mu):
     return(phy_tree_mut.draw(color='white', label=f"Phylogenetic tree (s={s})"),ltt_gen_tree)
     #gen_tree_expanded.write_tree_newick("output_gen_tree.tree.nwk", hide_rooted_prefix=True)
 
-
-# define a list of s values
-# s_values = [0.3,0.5,1.4]
-# loop over the s values
-# for s in s_values:
-#     # call the function with the current s value
-#     result = simulate_population_and_tree(N=4000, generations=20, mut_samples=60, s=s, mu=100)
-#     # append the result to the list
-#     results.append(result)
-
-
 # initialize an empty list to store the results
 results = []
 
