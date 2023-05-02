@@ -259,14 +259,19 @@ def simulate_population_and_tree(N, generations, mut_samples, s, mu):
     gen_tree = clusters_to_nodes(tree_clusters)
     from treeswift import read_tree_newick
     tree_string = gen_tree.newick()
+    # read newick tree
     phy_tree = read_tree_newick(tree_string)
     # assign random edge (branch) lengths
     phy_tree_mut = assign_edge_lengths(mu, phy_tree)
-    normalise_tree_lengths(phy_tree_mut)
+    # visualise tree
+    import matplotlib.patches as patches
+    white_patch = patches.Patch(color='black', label=f"Phylogenetic tree (s={s})")
+    plot = phy_tree_mut.draw(show_labels=False, handles=[white_patch])
+    #normalise_tree_lengths(phy_tree_mut)
     # calculate ltt stats and plot using treeswift
     ltt_gen_tree = phy_tree_mut.lineages_through_time()
     # write tree to newick txt file
-    return(phy_tree_mut.draw(color='white', label=f"Phylogenetic tree (s={s})"),ltt_gen_tree)
+    return(plot,ltt_gen_tree)
     #gen_tree_expanded.write_tree_newick("output_gen_tree.tree.nwk", hide_rooted_prefix=True)
 
 # initialize an empty list to store the results
