@@ -251,7 +251,7 @@ def read_observed_data(observed_data_path):
 
 ##### ------------- Wright-Fisher Simulation ------------------------------ #
 
-def simulate_population_and_tree(N, generations, mut_samples, s, mu):
+def simulate_population_and_tree(N, generations, mut_samples, s, mu, output_path):
     # initiate population
     popul = Population(N, generations, s) 
     # go from population array to tree_clusters dictionary
@@ -274,7 +274,7 @@ def simulate_population_and_tree(N, generations, mut_samples, s, mu):
     #plot.savefig(f"Simulation_{num_retries}_(s={s})_tree.png")
     #normalise_tree_lengths(phy_tree_mut)
     # calculate ltt stats and plot using treeswift
-    ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=True, export_filename=f"{output_path}/Plot_ltt.png")
+    ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=True, export_filename=f"{output_path}/Plot_ltt(s={s}).png")
     # write tree to newick txt file
     return phy_tree , ltt_gen_tree
     #gen_tree_expanded.write_tree_newick("output_gen_tree.tree.nwk", hide_rooted_prefix=True)
@@ -286,7 +286,7 @@ def run_simulation_with_restart(sim_number):
     num_retries = 0
     while num_retries <= sim_number:
         try:
-            result = simulate_population_and_tree(N=args.N, generations=args.generations, mut_samples=args.mut_samples, s=args.s, mu=args.mu)
+            result = simulate_population_and_tree(N=args.N, generations=args.generations, mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path)
             results.append(result)
         except AssertionError:
             num_retries += 1
