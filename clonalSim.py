@@ -278,15 +278,14 @@ def simulate_population_and_tree(N, generations, mut_samples, s, mu):
 results = []
 
 def run_simulation_with_restart():
-    for s in s_values:
-        num_retries = 0
-        while num_retries <= 2:
-            try:
-                result = simulate_population_and_tree(N=args.N, generations=args.generations, mut_samples=args.mut_samples, s=args.s, mu=args.mu)
-                results.append(result)
-            except AssertionError:
-                num_retries += 1
-                print("AssertionError occurred, restarting simulation...")
+    num_retries = 0
+    while num_retries <= 2:
+        try:
+            result = simulate_population_and_tree(N=args.N, generations=args.generations, mut_samples=args.mut_samples, s=args.s, mu=args.mu)
+            results.append(result)
+        except AssertionError:
+            num_retries += 1
+            print("AssertionError occurred, restarting simulation...")
 
 run_simulation_with_restart()
 # call the function with the command-line arguments
