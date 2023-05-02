@@ -7,5 +7,4 @@ dependencies:
   - matplotlib
   - treeswift
   - argparse
-  - csv
 prefix: /Users/mkalyva/opt/miniconda3/envs/ClonalSim
