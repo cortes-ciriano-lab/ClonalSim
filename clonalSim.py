@@ -271,7 +271,7 @@ def simulate_population_and_tree(N, generations, mut_samples, s, mu):
     # calculate ltt stats and plot using treeswift
     ltt_gen_tree = phy_tree_mut.lineages_through_time()
     # write tree to newick txt file
-    return(plot,ltt_gen_tree)
+    return(phy_tree_mut.draw(color='white', label=f"Phylogenetic tree (s={s})"),ltt_gen_tree)
     #gen_tree_expanded.write_tree_newick("output_gen_tree.tree.nwk", hide_rooted_prefix=True)
 
 # initialize an empty list to store the results
@@ -288,9 +288,9 @@ Set Priors and run ABC analysis using abcpy
 
 ##### Distance function between observed and synthetic data
 def distance_function():
-"""
-Calculate the distance between the observed and synthetic data.
-"""
+    """
+    Calculate the distance between the observed and synthetic data.
+    """
     pass
 
 
