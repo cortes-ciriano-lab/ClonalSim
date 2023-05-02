@@ -1,6 +1,16 @@
 
 # ClonalSim: A Python Wright-Fisher simulator for clonal expansions
-Use for the MSI evolution paper and thesis chapters. 
+
+ClonalSim effectively simulates a Wright-Fisher model with selection. Specifically, it will calculate a clonal expansion where everytime the number of mutant cells in each generation happens based on binomial sampling. This code was developed as part of the MSI evolution project.
+
+## Functionalities
+Main functionalities include:
+1. Population class with features and a method inside to simulate Wright-Fisher
+2. Transfer of an array population to a tree network with nodes, ready to import to the python treeswift package and versatile for further analysis.
+3. Read in function for observed data from a tsv file or string.
+4. Function to assign branch lengths based on a Poisson distribution with mean of a given mutation rate 
+5.  Function to do averaging across the branch lengths of the tree before summary statistics
+
 ## Description of the code
 #### Master Simulator Function that includes running the following:
 Step 1:  Python class that initiates a population class with features and a simulation method
