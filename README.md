@@ -82,4 +82,4 @@ Maria Kalyva
 This project is licensed - see the LICENSE.txt file for details
 
 ## Acknowledgments
-All the members of the Cortes-Ciriano lab for the discussions and https://github.com/bacpop/PopPUNK for inspiration on how to use python treeswift classes.
+All the members of the Cortes-Ciriano lab, David Helekal for the discussions and the https://github.com/bacpop/PopPUNK group for the inspiration on how to use python treeswift classes.
