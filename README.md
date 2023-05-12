@@ -54,7 +54,8 @@ obs_tree.draw()
 normalise_tree_lengths(obs_tree) # normalise tree before LTT statistics
 obs_tree.ltt()
 ```
-
+## Example Tree from MPN patient Van Egeren, D. et al. (2021) ‘Reconstructing the Lineage Histories and Differentiation Trajectories of Individual Cancer Cells in Myeloproliferative Neoplasms’, Cell stem cell
+<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/ET2.png" alt="Patient with ET" width="80%">
 
 ## Example Results of the Wright-Fisher model simulation
 
