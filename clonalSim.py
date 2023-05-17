@@ -17,8 +17,9 @@ parser.add_argument("--mut_samples", type=int, help="number of mutation samples"
 parser.add_argument("--s", type=float, help="selection coefficient")
 parser.add_argument("--mu", type=float, help="mutation rate")
 parser.add_argument("--sim_number", type=float, help="The number of simulations to run")
+parser.add_argument("--epsilon", type=float, help="The allowed tolerance parameter for the distance function")
 parser.add_argument('--output_path', type=str, default='.', help='output path')
-
+parser.add_argument('--data_path', type=str, default='.', help='observed data tree')
 
 # parse the command-line arguments
 args = parser.parse_args()
@@ -209,6 +210,15 @@ def assign_edge_lengths(mu, tree):
         node.set_edge_length(length)
     return tree
 
+def averaging_branch(tree):
+    """
+    Iterate through the tree class and average branch lengths
+    """
+    for node in tree.traverse_postorder():
+        # take all tree under this node
+        node.set_edge_length(length)
+    return tree
+
 def normalise_tree_lengths(tree):
     current_gen = {tree.root}
     while current_gen:
@@ -238,7 +248,7 @@ def read_observed_data(observed_data_path):
     tree = treeswift.read_tree_newick(tree_str)
     
     # Calculate lineage through time plot statistics
-    ltt = tree.lineages_through_time()
+    ltt = tree.lineages_through_time(show_plot=False)
 
     # Save the results in a data structure
     results = {
@@ -247,12 +257,28 @@ def read_observed_data(observed_data_path):
     }
     print("Tree:", results["tree"])
     print("LTT statistics:", results["ltt"])
-    return tree,ltt
+    #return tree,ltt
+    return ltt
 
 
-##### ------------- Wright-Fisher Simulation ------------------------------ #
+# ABC related functions
+"""
+Set Priors and run ABC analysis using abcpy
+"""
 
+##### Distance function between observed and synthetic data
+def calc_epsilon_dist(epsilon, ):
+    """
+    Calculate the euclidan distance between the observed and synthetic data.
+    """
+    pass
+
+##### ------------- Wright-Fisher Simulation and Epsilon Calc ------------------------------ #
+#def simulate_population_and_tree(N, generations, mut_samples, s, mu, output_path, num_retries, data_path, epsilon):
 def simulate_population_and_tree(N, generations, mut_samples, s, mu, output_path, num_retries):
+    #print("Read observed data...Reading tree and calculating ltt statistics...")
+    #obs_data_ltt = read_observed_data(data_path)
+    #print("LTT observed data done")
     print("Simulating population...")
     # initiate population
     popul = Population(N, generations, s) 
@@ -271,7 +297,7 @@ def simulate_population_and_tree(N, generations, mut_samples, s, mu, output_path
     # read newick tree
     print("Tree Saved")
     phy_tree = read_tree_newick(tree_string)
-    phy_tree.write_tree_newick(f"{output_path}/Simulation_{num_retries}_output_gen_tree.nwk", hide_rooted_prefix=True)
+    #phy_tree.write_tree_newick(f"{output_path}/Simulation_{num_retries}_output_gen_tree.nwk", hide_rooted_prefix=True)
     # assign random edge (branch) lengths
     phy_tree_mut = assign_edge_lengths(mu, phy_tree)
     # visualise tree
@@ -284,56 +310,45 @@ def simulate_population_and_tree(N, generations, mut_samples, s, mu, output_path
     print("LTT Statistics calculating...")
     #ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=True, export_filename=f"{output_path}/Plot_ltt(s={s}).png")
     ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=False)
-    with open(f"{output_path}/Simulation_{num_retries}_ltt_gen_tree.tsv", "w", newline='') as f:
-        writer = csv.writer(f, delimiter='\t')
-        for key, value in ltt_gen_tree.items():
-            writer.writerow([key, value])
-    
     print("LTT Statistics Done")
-
+    print("Calculating epsilon distance...")
+    #e_dist = calc_epsilon_dist(ltt_gen_tree, obs_data_ltt, epsilon)
+    print("Calculating epsilon distance done")
+    #return phy_tree , ltt_gen_tree, e_dist
     return phy_tree , ltt_gen_tree
 
-# initialize an empty list to store the results
-results = []
 
-def run_simulation_with_restart(sim_number):
+# run ABC rejection analysis by simulating and rejecting:
+#def run_simulation_with_restart(sim_number, epsilon):
+def run_simulation_with_restart(sim_number, output_path):
     num_retries = 0
     while num_retries <= sim_number:
         print(num_retries)
         try:
-            result = simulate_population_and_tree(N=args.N, generations=args.generations, mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, num_retries=num_retries)
-            results.append(result)
+            phy_tree_res , ltt_gen_tree_res  = simulate_population_and_tree(N=args.N, generations=args.generations, mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, num_retries=num_retries) #data_path=args.data_path, epsilon=args.epsilon
+            # write tree results
+            phy_tree_res.write_tree_newick(f"{output_path}/Simulation_{num_retries}_output_gen_tree.nwk", hide_rooted_prefix=True)
+            # write ltt results
+            with open(f"{output_path}/Simulation_{num_retries}_ltt_gen_tree.tsv", "w", newline='') as f:
+                writer = csv.writer(f, delimiter='\t')
+                for key, value in ltt_gen_tree_res.items():
+                    writer.writerow([key, value])
             num_retries += 1
         except AssertionError:
             num_retries += 1
             print("AssertionError occurred, restarting simulation...")
+        #except e_dist_res < epsilon:
+            #num_retries += 1
+            #print("Epsilon was larger than expected, restarting simulation...")
 
-run_simulation_with_restart(sim_number=args.sim_number)
+
+#run_simulation_with_restart(sim_number=args.sim_number, epsilon=args.epsilon)
+run_simulation_with_restart(sim_number=args.sim_number, output_path=args.output_path)
 
 
 # call the function with the command-line arguments
 #result = simulate_population_and_tree(N=args.N, generations=args.generations, mut_samples=args.mut_samples, s=args.s, mu=args.mu)
 
-
-##### ------------- Approximate Bayesian Criterion ----------------- #
-"""
-Set Priors and run ABC analysis using abcpy
-"""
-
-##### Distance function between observed and synthetic data
-def distance_function():
-    """
-    Calculate the distance between the observed and synthetic data.
-    """
-    pass
-
-
-
-def estimate_parameters(epsilon):
-    # set priors
-    s_prior = abcpy.Distribution(stats.uniform, 0, 2) # selection
-    
-    pass
         
 
     
