@@ -1,7 +1,7 @@
 
 # ClonalSim: A Python Wright-Fisher simulator for clonal expansions
 
-<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/ClonalSim.png" width="60%">
+<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/ClonalSim.png" width="80%">
 
 ClonalSim is an object-oriented program that effectively simulates a Wright-Fisher model with selection. Specifically, it is used to calculate a clonal expansion where the number of mutant cells in each generation are drawn with binomial sampling. This code is being developed as part of the MSI evolution project.
 
