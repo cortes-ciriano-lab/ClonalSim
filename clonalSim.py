@@ -209,21 +209,6 @@ def assign_edge_lengths(mu, tree):
         node.set_edge_length(length)
     return tree
 
-def normalise_tree_lengths(tree):
-    current_gen = {tree.root}
-    while current_gen:
-        #gen_lengths = {node.get_edge_length() for node in current_gen}
-        #average_length = sum(gen_lengths) / len(gen_lengths)
-        next_gen = set()
-        for node in current_gen:
-            children = node.child_nodes()
-            gen_lengths = {cnode.get_edge_length() for cnode in children}
-            average_length = sum(gen_lengths) / len(gen_lengths)
-            cnode.set_edge_length(average_length)
-            next_gen.update(node.child_nodes())
-        current_gen = next_gen
-
-
 def read_observed_data(observed_data_path):
     """
     Read observed tree and calculate LTT statistics and return or read in LTT statistics straight
