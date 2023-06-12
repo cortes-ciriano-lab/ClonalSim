@@ -6,6 +6,7 @@ import treeswift
 from treeswift import Tree, Node
 import argparse
 import csv
+import UltrametricConversion
 
 # create an argparse parser
 parser = argparse.ArgumentParser(description="Simulate population and tree")
