@@ -254,11 +254,13 @@ def simulate_population_and_tree(N, generations, mut_samples, s, mu, output_path
     tree_string = gen_tree.newick()
     print("Tree Done")
     # read newick tree
-    print("Tree Saved")
     phy_tree = read_tree_newick(tree_string)
     phy_tree.write_tree_newick(f"{output_path}/Simulation_{num_retries}_output_gen_tree.nwk", hide_rooted_prefix=True)
+    print("Tree Saved")
     # assign random edge (branch) lengths
     phy_tree_mut = assign_edge_lengths(mu, phy_tree)
+    # make tree ultrametric
+    phy_tree_ult = traverse_and_run_average(phy_tree_mut)
     # visualise tree
     #import matplotlib.patches as patches
     #plot = phy_tree_mut.draw(show_labels=False, handles=[white_patch])
@@ -273,10 +275,14 @@ def simulate_population_and_tree(N, generations, mut_samples, s, mu, output_path
         writer = csv.writer(f, delimiter='\t')
         for key, value in ltt_gen_tree.items():
             writer.writerow([key, value])
-    
+
+    # normalise ltt stats
+    list_of_tuples_tree = [(key, value) for key, value in lttA.items()]
+    data_transformed = transform_data(list_of_tuples_tree)
+    norm_data = normalise_data(data_transformed)
     print("LTT Statistics Done")
 
-    return phy_tree , ltt_gen_tree
+    return phy_tree_ult , norm_data
 
 # initialize an empty list to store the results
 results = []
