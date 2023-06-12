@@ -129,8 +129,8 @@ def traverse_and_run_average(tree_obj):
         subtree = tree_obj.extract_subtree(n)
         children = list(subtree.root.child_nodes())
         if len(children) < 2:
-        print("Less than two child nodes!")
-            continue  # Or handle this situation differently based on your needs
+            print("Less than two child nodes!")
+            continue  
         left_child = children[0]
         right_child = children[1]
         #print("now printing standard tree")
