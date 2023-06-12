@@ -86,6 +86,12 @@ def upd_tree_lengths(obs_tree_obj, left_path, right_path, subtree_obj):
 def extract_subtree_paths(subtree):
     paths_to_node_list = []
 
+    child_nodes = list(subtree.root.child_nodes())  
+
+    if len(child_nodes) < 2:
+        print("Warning: Less than two child nodes!")
+        continue
+    
     left_child = subtree.root.child_nodes()[0]
     right_child = subtree.root.child_nodes()[1]
 
