@@ -285,7 +285,7 @@ def simulate_population_and_tree(N, generations, mut_samples, s, mu, output_path
     # write data to a csv file
     with open(f"{output_path}/Simulation_{num_retries}_ltt_normalised.tsv", "w", newline='') as f:
         writer = csv.writer(f, delimiter='\t')
-        writer.writerow(norm_data)
+        writer.writerows(norm_data)
 
 
     print("LTT Statistics Done")
