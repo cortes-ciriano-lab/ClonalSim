@@ -282,6 +282,12 @@ def simulate_population_and_tree(N, generations, mut_samples, s, mu, output_path
     list_of_tuples_tree = [(key, value) for key, value in ltt_gen_tree.items()]
     data_transformed = transform_data(list_of_tuples_tree)
     norm_data = normalise_data(data_transformed)
+    # write data to a csv file
+    with open(f"{output_path}/Simulation_{num_retries}_ltt_normalised.tsv", "w", newline='') as f:
+        writer = csv.writer(f, delimiter='\t')
+        writer.writerow(norm_data)
+
+
     print("LTT Statistics Done")
 
     return phy_tree_ult , norm_data
