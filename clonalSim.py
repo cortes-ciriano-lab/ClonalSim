@@ -8,6 +8,8 @@ import argparse
 import csv
 #import UltrametricConversion
 from UltrametricConversion import traverse_and_run_average
+from UltrametricConversion import transform_data
+from UltrametricConversion import normalise_data
 # create an argparse parser
 parser = argparse.ArgumentParser(description="Simulate population and tree")
 
@@ -278,8 +280,8 @@ def simulate_population_and_tree(N, generations, mut_samples, s, mu, output_path
 
     # normalise ltt stats
     list_of_tuples_tree = [(key, value) for key, value in ltt_gen_tree.items()]
-    data_transformed = UltrametricConversion.transform_data(list_of_tuples_tree)
-    norm_data = UltrametricConversion.normalise_data(data_transformed)
+    data_transformed = transform_data(list_of_tuples_tree)
+    norm_data = normalise_data(data_transformed)
     print("LTT Statistics Done")
 
     return phy_tree_ult , norm_data
