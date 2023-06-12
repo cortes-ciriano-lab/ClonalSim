@@ -278,7 +278,7 @@ def simulate_population_and_tree(N, generations, mut_samples, s, mu, output_path
             writer.writerow([key, value])
 
     # normalise ltt stats
-    list_of_tuples_tree = [(key, value) for key, value in lttA.items()]
+    list_of_tuples_tree = [(key, value) for key, value in ltt_gen_tree.items()]
     data_transformed = transform_data(list_of_tuples_tree)
     norm_data = normalise_data(data_transformed)
     print("LTT Statistics Done")
