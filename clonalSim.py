@@ -56,31 +56,29 @@ class Population:
                 mut_n_list.append(0)
                 binom_prob_list.append(0)
             else:
-                
-            population[random.randint(0, self.N - 1)] = 1
-            mut_n = len(np.where(self.generation_data[gen] == 1)[0])
-            mut_n_list.append(mut_n)
-                
-            cancer_p = (1 + self.s) * mut_n / (self.N + (mut_n * self.s))
-            binom_prob_list.append(cancer_p)
+                population[random.randint(0, self.N - 1)] = 1
+                mut_n = len(np.where(self.generation_data[gen] == 1)[0])
+                mut_n_list.append(mut_n)
                     
-            offspring = np.random.binomial(n=1, p=cancer_p, size=self.N)
-            
-            num_mutants = [np.count_nonzero(offspring == 1)]
-            
-            if num_mutants == 0:
-                print("Stochastic Extinction")
-                self.generation_data.append(offspring)
-                num_mutants = [np.count_nonzero(generation == 1) for generation in self.generation_data]
-                # Plot the number of mutants over time
-                fig, ax = plt.subplots()
-                ax.plot(range(len(num_mutants)), np.log(num_mutants))
-                ax.set_xlabel("Time in Generations")
-                ax.set_ylabel("Number of mutants ln(N)")
-                ax.set_title(f"Mutant allele frequency over time (s={self.s})")
-                plt.show()
-                return(self.generation_data, binom_prob_list, mut_n_list, fig) 
-            
+                cancer_p = (1 + self.s) * mut_n / (self.N + (mut_n * self.s))
+                binom_prob_list.append(cancer_p)
+                        
+                offspring = np.random.binomial(n=1, p=cancer_p, size=self.N)
+                
+                num_mutants = [np.count_nonzero(offspring == 1)]
+                
+                if num_mutants == 0:
+                    print("Stochastic Extinction")
+                    self.generation_data.append(offspring)
+                    num_mutants = [np.count_nonzero(generation == 1) for generation in self.generation_data]
+                    # Plot the number of mutants over time
+                    fig, ax = plt.subplots()
+                    ax.plot(range(len(num_mutants)), np.log(num_mutants))
+                    ax.set_xlabel("Time in Generations")
+                    ax.set_ylabel("Number of mutants ln(N)")
+                    ax.set_title(f"Mutant allele frequency over time (s={self.s})")
+                    plt.show()
+                    return(self.generation_data, binom_prob_list, mut_n_list, fig)            
         self.generation_data.append(offspring)
 
         # for gen in range(self.generations):
