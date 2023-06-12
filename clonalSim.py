@@ -35,7 +35,7 @@ class Population:
         self.generation_data = []
 
     def __str__(self):
-        return f"Population size: {self.N}, Generations: {self.generations}, Selection: {self.s}"
+        return f"Population size: {self.N}, Generations: {self.generations}, Disease_Onset: {self.disease}, Selection: {self.s}"
 
     def simulate_population(self):
         """
