@@ -90,8 +90,7 @@ def extract_subtree_paths(subtree):
 
     if len(child_nodes) < 2:
         print("Warning: Less than two child nodes!")
-        continue
-    
+    else:
     left_child = subtree.root.child_nodes()[0]
     right_child = subtree.root.child_nodes()[1]
 
