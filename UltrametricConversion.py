@@ -91,16 +91,16 @@ def extract_subtree_paths(subtree):
     if len(child_nodes) < 2:
         print("Warning: Less than two child nodes!")
     else:
-    left_child = subtree.root.child_nodes()[0]
-    right_child = subtree.root.child_nodes()[1]
+        left_child = subtree.root.child_nodes()[0]
+        right_child = subtree.root.child_nodes()[1]
+    
+        right_paths = get_path_to_leaf(right_child)
+        paths_to_node_list.append(right_paths)
 
-    right_paths = get_path_to_leaf(right_child)
-    paths_to_node_list.append(right_paths)
+        left_paths = get_path_to_leaf(left_child)
+        paths_to_node_list.append(left_paths)
 
-    left_paths = get_path_to_leaf(left_child)
-    paths_to_node_list.append(left_paths)
-
-    return paths_to_node_list, right_paths, left_paths
+        return paths_to_node_list, right_paths, left_paths
 
 def average_subtree(tree_obj, subtree_side):
     for n in subtree_side.traverse_postorder(leaves=False):
