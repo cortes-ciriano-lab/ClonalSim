@@ -45,18 +45,19 @@ class Population:
 
         # Initialize the first population
         population = np.zeros(self.N, dtype=int)
-        population[random.randint(0, self.N - 1)] = 1
         self.generation_data.append(population)
         binom_prob_list  = []
         mut_n_list = []
 
         for gen in range(self.generations):
+
             if gen < self.disease:
                 self.generation_data.append(np.zeros(self.N))
                 mut_n_list.append(0)
                 binom_prob_list.append(0)
-                continue
-            
+            else:
+                
+            population[random.randint(0, self.N - 1)] = 1
             mut_n = len(np.where(self.generation_data[gen] == 1)[0])
             mut_n_list.append(mut_n)
                 
