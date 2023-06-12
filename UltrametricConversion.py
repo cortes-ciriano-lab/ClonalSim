@@ -217,8 +217,3 @@ def normalise_data(data):
         data_norm.append((current_x, current_y))
     
     return data_norm
-
-data1_transformed = transform_data(list_of_tuples_A)
-data2_transformed = transform_data(list_of_tuples_B)
-norm_data1 = normalise_data(data1_transformed)
-norm_data2 = normalise_data(data2_transformed)
