@@ -93,7 +93,7 @@ def extract_subtree_paths(subtree):
     else:
         left_child = subtree.root.child_nodes()[0]
         right_child = subtree.root.child_nodes()[1]
-    
+
         right_paths = get_path_to_leaf(right_child)
         paths_to_node_list.append(right_paths)
 
@@ -109,6 +109,11 @@ def average_subtree(tree_obj, subtree_side):
         print(f"Subtree Node Now: {n}")
 
         subtree_small = subtree_side.extract_subtree(n)
+        child_nodes_v2 = list(subtree_small.root.child_nodes())
+        
+        if len(child_nodes_v2) < 2:
+            print("Warning: Less than two child nodes!")
+            continue
         #print("now printing standard tree")
         #subtree.draw(show_labels=True)
 
