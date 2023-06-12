@@ -187,3 +187,38 @@ def traverse_and_run_average(tree_obj):
         for lpath in left_paths:
             upd_tree_lengths(obs_tree_obj=tree_obj, left_path=lpath, right_path=rpath, subtree_obj=subtree) 
             
+
+def transform_data(data):
+    data_transformed = []
+    
+    for i in range(len(data) - 1):
+        current_x, current_y = data[i]
+        next_x, _ = data[i+1]
+        
+        for x in range(int(current_x), int(next_x)):
+            data_transformed.append((x, current_y))
+
+    last_x, last_y = data[-1]
+    # Assuming that we need to add one more point after the last x based on the example provided
+    data_transformed.append((int(last_x), last_y))
+    data_transformed.append((int(last_x) + 1, last_y))
+    
+    return data_transformed
+
+def normalise_data(data):
+    data_norm = []
+    
+    for i in range(len(data)):
+        current_x, current_y = data[i]
+        
+        # Normalise the 0th element of the tuple with the last 0th element of the data
+        current_x = current_x / data[-1][0]
+        
+        data_norm.append((current_x, current_y))
+    
+    return data_norm
+
+data1_transformed = transform_data(list_of_tuples_A)
+data2_transformed = transform_data(list_of_tuples_B)
+norm_data1 = normalise_data(data1_transformed)
+norm_data2 = normalise_data(data2_transformed)
