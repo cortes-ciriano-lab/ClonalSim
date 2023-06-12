@@ -16,6 +16,7 @@ parser = argparse.ArgumentParser(description="Simulate population and tree")
 # add arguments for the simulation parameters
 parser.add_argument("--N", type=int, help="population size")
 parser.add_argument("--generations", type=int, help="number of generations to simulate")
+parser.add_argument("--disease", type=int, help="number of generations the disease starts")
 parser.add_argument("--mut_samples", type=int, help="number of mutation samples")
 parser.add_argument("--s", type=float, help="selection coefficient")
 parser.add_argument("--mu", type=float, help="mutation rate")
@@ -272,10 +273,10 @@ def read_observed_data(observed_data_path):
 
 ##### ------------- Wright-Fisher Simulation ------------------------------ #
 
-def simulate_population_and_tree(N, generations, mut_samples, s, mu, output_path, num_retries):
+def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, output_path, num_retries):
     print("Simulating population...")
     # initiate population
-    popul = Population(N, generations, s) 
+    popul = Population(N, generations, disease, s) 
     # go from population array to tree_clusters dictionary
     gen, prob, mut, fig = popul.simulate_population()
     fig.savefig(f"{output_path}/Simulation_{num_retries}_with_mutants_in_time_(s={s}).png")
@@ -333,7 +334,7 @@ def run_simulation_with_restart(sim_number):
     while num_retries <= sim_number:
         print(num_retries)
         try:
-            result = simulate_population_and_tree(N=args.N, generations=args.generations, mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, num_retries=num_retries)
+            result = simulate_population_and_tree(N=args.N, generations=args.generations, disease=args.disease,  mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, num_retries=num_retries)
             results.append(result)
             num_retries += 1
         except AssertionError:
