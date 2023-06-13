@@ -45,7 +45,7 @@ class Population:
 
         # Initialize the first population
         population = np.zeros(self.N, dtype=int)
-        self.generation_data.append(population)
+        #self.generation_data.append(population)
         binom_prob_list  = []
         mut_n_list = []
 
@@ -57,6 +57,7 @@ class Population:
                 binom_prob_list.append(0)
             else:
                 population[random.randint(0, self.N - 1)] = 1
+                print(population)
                 mut_n = len(np.where(self.generation_data[gen] == 1)[0])
                 mut_n_list.append(mut_n)
                     
