@@ -50,7 +50,7 @@ class Population:
         mut_n_list = []
 
         for gen in range(self.generations):
-
+            print(gen)
             if gen < self.disease:
                 self.generation_data.append(np.zeros(self.N))
                 mut_n_list.append(0)
