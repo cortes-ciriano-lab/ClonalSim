@@ -49,13 +49,13 @@ class Population:
         binom_prob_list  = []
         mut_n_list = []
 
-        for gen in range(self.generations):
+        for gen in range(self.generations-1):
             print(gen)
             if gen < self.disease:
                 self.generation_data.append(np.zeros(self.N))
                 mut_n_list.append(0)
                 binom_prob_list.append(0)
-            else:
+            else:d
                 population[random.randint(0, self.N - 1)] = 1
                 print(population)
                 mut_n = len(np.where(self.generation_data[gen] == 1)[0])
