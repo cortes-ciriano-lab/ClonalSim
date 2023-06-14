@@ -45,42 +45,54 @@ class Population:
 
         # Initialize the first population
         population = np.zeros(self.N, dtype=int)
-        #self.generation_data.append(population)
+        self.generation_data.append(population)
         binom_prob_list  = []
         mut_n_list = []
 
-        for gen in range(self.generations-1):
+        for gen in range(1,self.generations+1):
             print(gen)
-            if gen < self.disease:
-                self.generation_data.append(np.zeros(self.N))
-                mut_n_list.append(0)
-                binom_prob_list.append(0)
-            else:d
-                population[random.randint(0, self.N - 1)] = 1
-                print(population)
-                mut_n = len(np.where(self.generation_data[gen] == 1)[0])
-                mut_n_list.append(mut_n)
-                    
-                cancer_p = (1 + self.s) * mut_n / (self.N + (mut_n * self.s))
-                binom_prob_list.append(cancer_p)
+            if gen-1 < len(self.generation_data) and len(self.generation_data) > 0:
+                print("Passed if")
+                if gen < self.disease:
+                    print("Disease hasn't started yet")
+                    self.generation_data.append(np.zeros(self.N))
+                    mut_n_list.append(0)
+                    binom_prob_list.append(0)
+                elif gen == self.disease:
+                    # first cell with mutation
+                    print("Disease started")
+                    population[random.randint(0, self.N - 1)] = 1
+                    self.generation_data.append(population)
+                elif gen > self.disease:
+                    # clonal expansion
+                    print("Expansion started")
+                    print(f"Length self.gen.data: {len(self.generation_data)}")
+                    print(self.generation_data[gen-1])
+                    mut_n = len(np.where(self.generation_data[gen-1] == 1)[0])
+                    print(mut_n)
+                    mut_n_list.append(mut_n)
                         
-                offspring = np.random.binomial(n=1, p=cancer_p, size=self.N)
-                
-                num_mutants = [np.count_nonzero(offspring == 1)]
-                
-                if num_mutants == 0:
-                    print("Stochastic Extinction")
+                    cancer_p = (1 + self.s) * mut_n / (self.N + (mut_n * self.s))
+                    binom_prob_list.append(cancer_p)
+                            
+                    offspring = np.random.binomial(n=1, p=cancer_p, size=self.N)
+                    
+                    num_mutants = [np.count_nonzero(offspring == 1)]
+                    
+                    if num_mutants == 0:
+                        print("Stochastic Extinction")
+                        self.generation_data.append(offspring)
+                        num_mutants = [np.count_nonzero(generation == 1) for generation in self.generation_data]
+                        # Plot the number of mutants over time
+                        fig, ax = plt.subplots()
+                        ax.plot(range(len(num_mutants)), np.log(num_mutants))
+                        ax.set_xlabel("Time in Generations")
+                        ax.set_ylabel("Number of mutants ln(N)")
+                        ax.set_title(f"Mutant allele frequency over time (s={self.s})")
+                        plt.show()
+                        return(self.generation_data, binom_prob_list, mut_n_list, fig)            
+                    
                     self.generation_data.append(offspring)
-                    num_mutants = [np.count_nonzero(generation == 1) for generation in self.generation_data]
-                    # Plot the number of mutants over time
-                    fig, ax = plt.subplots()
-                    ax.plot(range(len(num_mutants)), np.log(num_mutants))
-                    ax.set_xlabel("Time in Generations")
-                    ax.set_ylabel("Number of mutants ln(N)")
-                    ax.set_title(f"Mutant allele frequency over time (s={self.s})")
-                    plt.show()
-                    return(self.generation_data, binom_prob_list, mut_n_list, fig)            
-        self.generation_data.append(offspring)
 
         # for gen in range(self.generations):
         #     mut_n = len(np.where(self.generation_data[gen] == 1)[0])
@@ -110,15 +122,15 @@ class Population:
             
         # Plot the number of mutants over time
         # Count the number of individuals with a value of 1 in each generation
-        # num_mutants = [np.count_nonzero(generation == 1) for generation in self.generation_data]
+        num_mutants = [np.count_nonzero(generation == 1) for generation in self.generation_data]
         
         # Plot the number of mutants over time
-        # fig, ax = plt.subplots()
-        # ax.plot(range(len(num_mutants)), np.log(num_mutants))
-        # ax.set_xlabel("Time in Generations")
-        # ax.set_ylabel("Number of mutants ln(N)")
-        # ax.set_title(f"Mutant allele frequency over time (s={self.s})")
-        #plt.show()
+        fig, ax = plt.subplots()
+        ax.plot(range(len(num_mutants)), np.log(num_mutants))
+        ax.set_xlabel("Time in Generations")
+        ax.set_ylabel("Number of mutants ln(N)")
+        ax.set_title(f"Mutant allele frequency over time (s={self.s})")
+        plt.show()
         
         return(self.generation_data, binom_prob_list, mut_n_list, fig) 
     
@@ -154,6 +166,9 @@ def build_leaf_to_root_connections(tree_mask, mut_samples):
         for generation_idx, generation in reversed(
             list(enumerate(node_to_leaves[:-1]))
         ):
+            if not generation:  # Skip if the generation has no nodes
+                print("No mutants yet")
+                continue
             # If we already have a leaf to follow, pick it's ancestor, otherwise pick a random one
             if leaf_to_follow is not None:
                 parent_idx = next(
@@ -163,7 +178,8 @@ def build_leaf_to_root_connections(tree_mask, mut_samples):
                 )
             else:
                 parent_idx = random.choice(list(generation.keys()))
-
+            
+            
             # If the parent already has a leaf, pick it's ancestor in all previous generations to avoid cycles
             if len(node_to_leaves[generation_idx][parent_idx]) > 0:
                 leaf_to_follow = list(node_to_leaves[generation_idx][parent_idx])[0]
@@ -176,6 +192,7 @@ def build_leaf_to_root_connections(tree_mask, mut_samples):
     # Drop any non leaves that weren't connected
     # Create a dict from node coordinates to leaf coordinates
     result = {}
+    
     for generation_idx, generation in enumerate(node_to_leaves):
         for node_idx, leaves in generation.items():
             if generation_idx == len(node_to_leaves) - 1 or len(leaves) > 0:
