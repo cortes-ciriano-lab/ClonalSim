@@ -20,7 +20,7 @@ parser.add_argument("--disease", type=int, help="number of generations the disea
 parser.add_argument("--mut_samples", type=int, help="number of mutation samples")
 parser.add_argument("--s", type=float, help="selection coefficient")
 parser.add_argument("--mu", type=float, help="mutation rate")
-parser.add_argument("--sim_number", type=float, help="The number of simulations to run")
+parser.add_argument("--sim_number", type=float, help="The number of simulations to run", default=1, required=False)
 parser.add_argument('--output_path', type=str, default='.', help='output path')
 
 
@@ -343,23 +343,32 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
 
     return phy_tree_ult , norm_data
 
-# initialize an empty list to store the results
-results = []
+# results = []
 
-def run_simulation_with_restart(sim_number):
-    num_retries = 0
-    while num_retries <= sim_number:
-        print(num_retries)
-        try:
-            result = simulate_population_and_tree(N=args.N, generations=args.generations, disease=args.disease,  mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, num_retries=num_retries)
-            results.append(result)
-            num_retries += 1
+# def run_simulation_with_restart(sim_number):
+#     num_retries = 0
+#     while num_retries <= sim_number:
+#         print(num_retries)
+#         try:
+#             result = simulate_population_and_tree(N=args.N, generations=args.generations, disease=args.disease,  mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, num_retries=num_retries)
+#             results.append(result)
+#             num_retries += 1
+#         except AssertionError:
+#             num_retries += 1
+#             print("AssertionError occurred, restarting simulation...")
+
+# run_simulation_with_restart(sim_number=args.sim_number)
+
+while num_retries <= sim_number:
+    print(num_retries)
+    try:
+        result = simulate_population_and_tree(N=args.N, generations=args.generations, disease=args.disease,  mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, num_retries=num_retries)
+        num_retries += 1
         except AssertionError:
             num_retries += 1
             print("AssertionError occurred, restarting simulation...")
-
+        
 run_simulation_with_restart(sim_number=args.sim_number)
-
 
 # call the function with the command-line arguments
 #result = simulate_population_and_tree(N=args.N, generations=args.generations, mut_samples=args.mut_samples, s=args.s, mu=args.mu)
@@ -376,14 +385,4 @@ def distance_function():
     Calculate the distance between the observed and synthetic data.
     """
     pass
-
-
-
-def estimate_parameters(epsilon):
-    # set priors
-    s_prior = abcpy.Distribution(stats.uniform, 0, 2) # selection
-    
-    pass
-        
-
     
