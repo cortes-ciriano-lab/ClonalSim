@@ -360,6 +360,7 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
 # run_simulation_with_restart(sim_number=args.sim_number)
 
 while num_retries <= sim_number:
+    num_retries = 0
     print(num_retries)
     try:
         result = simulate_population_and_tree(N=args.N, generations=args.generations, disease=args.disease,  mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, num_retries=num_retries)
