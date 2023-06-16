@@ -278,6 +278,9 @@ def read_observed_data(observed_data_path):
     
     # Calculate lineage through time plot statistics
     ltt = tree.lineages_through_time()
+    list_of_tuples_obs = [(key, value) for key, value in ltt.items()]
+    data_transformed_obs = transform_data(list_of_tuples_obs)
+    norm_ltt = normalise_data(data_transformed_obs)
 
     # Save the results in a data structure
     results = {
@@ -286,9 +289,67 @@ def read_observed_data(observed_data_path):
     }
     print("Tree:", results["tree"])
     print("LTT statistics:", results["ltt"])
-    return tree,ltt
+    return tree, norm_ltt
 
-##### ------------- Wright-Fisher Simulation ------------------------------ #
+
+def plot_lineage_through_time(data1, data2):
+    
+    
+    #x = np.linspace(0, 1, 10)
+    
+    x1 = [item[0] for item in data1]
+    y1 = [item[1] for item in data1]
+
+    x2 = [item[0] for item in data2]
+    y2 = [item[1] for item in data2]
+
+    area1 = 0.0
+    colors1 = ['lightsalmon', 'lightblue', 'lightgreen', 'lightpink', 'lightyellow', 'lightcoral', 'lavender']
+
+    for i in range(len(x1) - 1):
+        area1 += y1[i] * (x1[i+1] - x1[i])
+        plt.fill_between(x1[i:i+2], y1[i:i+2], step='post', alpha=0.3, color=colors1[i % len(colors1)])
+
+    area2 = 0.0
+    colors2 = ['lightgray', 'lightcyan', 'lightseagreen', 'lightcoral', 'lightpink', 'lightgreen', 'lightyellow']
+
+    for i in range(len(x2) - 1):
+        area2 += y2[i] * (x2[i+1] - x2[i])
+        plt.fill_between(x2[i:i+2], y2[i:i+2], step='post', alpha=0.3, color=colors2[i % len(colors2)])
+
+    plt1 = plt.step(x1, y1, linestyle='-', where='post', label='Data 1')
+    plt2 = plt.step(x2, y2, linestyle='-', where='post', label='Data 2')
+
+    #plt1 = plt.plot(x1, y1, label='Data 1')
+    #plt2 = plt.plot(x2, y2, label='Data 2')
+    #plt.fill_between(x, y1, y2, color='darkred', alpha=0.3)
+    plt.xlabel('Time')
+    plt.ylabel('Lineage')
+    plt.title('Lineage Through Time')
+    plt.legend()
+    plt.show()
+
+    # Calculation of area between curves
+    area_between_curves = 0
+    for y1_i, y2_i in zip(y1[:-1], y2[:-1]):
+        abs_difference = abs(y2_i - y1_i)
+        print(f"y1: {y1_i}, y2: {y2_i}, Absolute Difference: {abs_difference}")
+        area_between_curves += abs_difference
+
+    #area_between_curves = sum(abs(y2_i - y1_i) for y1_i, y2_i in zip(y1, y2))
+
+    print("Area under the line (Data 1):", area1)
+    print("Area under the line (Data 2):", area2)
+    print("Area between the curves:", area_between_curves)
+
+    return plt1, plt2, area_between_curves
+
+
+
+
+
+
+##### ------------- Wright-Fisher Simulation ------------------------------ ##########
 
 def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, output_path, num_retries):
     print("Simulating population...")
@@ -341,7 +402,14 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
 
     print("LTT Statistics Done")
 
-    return phy_tree_ult , norm_data
+    plt1t, plt2t , abc = plot_lineage_through_time(norm_ltt , norm_data)
+
+    print("Aread Under the curve calculated")
+
+    return phy_tree_ult , abc
+
+
+
 
 # results = []
 
@@ -371,17 +439,3 @@ while num_retries <= sim_number:
         
 # call the function with the command-line arguments
 #result = simulate_population_and_tree(N=args.N, generations=args.generations, mut_samples=args.mut_samples, s=args.s, mu=args.mu)
-
-
-##### ------------- Approximate Bayesian Criterion ----------------- #
-"""
-Set Priors and run ABC analysis using abcpy
-"""
-
-##### Distance function between observed and synthetic data
-def distance_function():
-    """
-    Calculate the distance between the observed and synthetic data.
-    """
-    pass
-    
