@@ -23,6 +23,8 @@ parser.add_argument("--mu", type=float, help="mutation rate")
 #parser.add_argument("--epsilon", type=float, help="Epsilon Threshold")
 parser.add_argument("--sim_number", type=float, help="The number of simulations to run", default=1, required=False)
 parser.add_argument('--output_path', type=str, default='.', help='output path')
+parser.add_argument('--observed_data_path', type=str, default='.', help='observed_data_path')
+
 
 
 # parse the command-line arguments
@@ -352,7 +354,7 @@ def plot_lineage_through_time(data1, data2):
 
 ##### ------------- Wright-Fisher Simulation ------------------------------ ##########
 
-def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, output_path, num_retries):
+def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, output_path, observed_d_path, num_retries):
     print("Simulating population...")
     # initiate population
     popul = Population(N, generations, disease, s) 
@@ -403,7 +405,10 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
 
     print("LTT Statistics Done")
 
-    plt1t, plt2t , abc = plot_lineage_through_time(norm_ltt , norm_data)
+    print("Reading Observed Data and Calculating LTT...")
+    obs_tree , obs_ltt = read_observed_data(observed_d_path)
+
+    plt1t, plt2t , abc = plot_lineage_through_time(obs_ltt , norm_data)
 
     print("Aread Under the curve calculated")
 
@@ -431,7 +436,7 @@ num_retries = 0
 while num_retries <= sim_number:
     print(num_retries)
     try:
-        result_tree, abc_epsilon = simulate_population_and_tree(N=args.N, generations=args.generations, disease=args.disease,  mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, num_retries=num_retries)
+        result_tree, abc_epsilon = simulate_population_and_tree(N=args.N, generations=args.generations, disease=args.disease,  mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, observed_d_path=args.observed_data_path, num_retries=num_retries)
         # Write abc_epsilon and simulation number in a file
         with open(f"{args.output_path}/Simulation_results_abc_epsilon.tsv", "a", newline='') as f:
             f.write(f"{num_retries}\t{abc_epsilon}\n")
