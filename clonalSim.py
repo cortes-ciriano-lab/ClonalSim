@@ -411,9 +411,6 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     plt1t, plt2t , abc = plot_lineage_through_time(obs_ltt , norm_data)
 
     print("Aread Under the curve calculated")
-
-
-    #return phy_tree_ult , abc
     return phy_tree_ult , abc
 
 # results = []
