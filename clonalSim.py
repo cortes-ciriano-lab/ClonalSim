@@ -1,15 +1,16 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import random
-#import abcpy
+# import abcpy
 import treeswift
 from treeswift import Tree, Node
 import argparse
 import csv
-#import UltrametricConversion
+# import UltrametricConversion
 from UltrametricConversion import traverse_and_run_average
 from UltrametricConversion import transform_data
 from UltrametricConversion import normalise_data
+
 # create an argparse parser
 parser = argparse.ArgumentParser(description="Simulate population and tree")
 
@@ -20,15 +21,15 @@ parser.add_argument("--disease", type=int, help="number of generations the disea
 parser.add_argument("--mut_samples", type=int, help="number of mutation samples")
 parser.add_argument("--s", type=float, help="selection coefficient")
 parser.add_argument("--mu", type=float, help="mutation rate")
-#parser.add_argument("--epsilon", type=float, help="Epsilon Threshold")
+# parser.add_argument("--epsilon", type=float, help="Epsilon Threshold")
 parser.add_argument("--sim_number", type=float, help="The number of simulations to run", default=1, required=False)
 parser.add_argument('--output_path', type=str, default='.', help='output path')
 parser.add_argument('--observed_data_path', type=str, default='.', help='observed_data_path')
 
 
-
 # parse the command-line arguments
 args = parser.parse_args()
+
 
 class Population:
     def __init__(self, N, generations, disease, s):
@@ -49,12 +50,12 @@ class Population:
         # Initialize the first population
         population = np.zeros(self.N, dtype=int)
         self.generation_data.append(population)
-        binom_prob_list  = []
+        binom_prob_list = []
         mut_n_list = []
 
-        for gen in range(1,self.generations+1):
+        for gen in range(1, self.generations + 1):
             print(gen)
-            if gen-1 < len(self.generation_data) and len(self.generation_data) > 0:
+            if gen - 1 < len(self.generation_data) and len(self.generation_data) > 0:
                 print("Passed if")
                 if gen < self.disease:
                     print("Disease hasn't started yet")
@@ -70,18 +71,18 @@ class Population:
                     # clonal expansion
                     print("Expansion started")
                     print(f"Length self.gen.data: {len(self.generation_data)}")
-                    print(self.generation_data[gen-1])
-                    mut_n = len(np.where(self.generation_data[gen-1] == 1)[0])
+                    print(self.generation_data[gen - 1])
+                    mut_n = len(np.where(self.generation_data[gen - 1] == 1)[0])
                     print(mut_n)
                     mut_n_list.append(mut_n)
-                        
+
                     cancer_p = (1 + self.s) * mut_n / (self.N + (mut_n * self.s))
                     binom_prob_list.append(cancer_p)
-                            
+
                     offspring = np.random.binomial(n=1, p=cancer_p, size=self.N)
-                    
+
                     num_mutants = [np.count_nonzero(offspring == 1)]
-                    
+
                     if num_mutants == 0:
                         print("Stochastic Extinction")
                         self.generation_data.append(offspring)
@@ -93,21 +94,21 @@ class Population:
                         ax.set_ylabel("Number of mutants ln(N)")
                         ax.set_title(f"Mutant allele frequency over time (s={self.s})")
                         plt.show()
-                        return(self.generation_data, binom_prob_list, mut_n_list, fig)            
-                    
+                        return (self.generation_data, binom_prob_list, mut_n_list, fig)
+
                     self.generation_data.append(offspring)
 
         # for gen in range(self.generations):
         #     mut_n = len(np.where(self.generation_data[gen] == 1)[0])
         #     mut_n_list.append(mut_n)
-            
+
         #     cancer_p = (1 + self.s) * mut_n / (self.N + (mut_n * self.s))
         #     binom_prob_list.append(cancer_p)
-                
+
         #     offspring = np.random.binomial(n=1, p=cancer_p, size=self.N)
-            
+
         #     num_mutants = [np.count_nonzero(offspring == 1)]
-            
+
         #     if num_mutants == 0:
         #         print("Stochastic Extinction")
         #         self.generation_data.append(offspring)
@@ -119,14 +120,14 @@ class Population:
         #         ax.set_ylabel("Number of mutants ln(N)")
         #         ax.set_title(f"Mutant allele frequency over time (s={self.s})")
         #         plt.show()
-        #         return(self.generation_data, binom_prob_list, mut_n_list, fig) 
-            
+        #         return(self.generation_data, binom_prob_list, mut_n_list, fig)
+
         #     self.generation_data.append(offspring)
-            
+
         # Plot the number of mutants over time
         # Count the number of individuals with a value of 1 in each generation
         num_mutants = [np.count_nonzero(generation == 1) for generation in self.generation_data]
-        
+
         # Plot the number of mutants over time
         fig, ax = plt.subplots()
         ax.plot(range(len(num_mutants)), np.log(num_mutants))
@@ -134,9 +135,9 @@ class Population:
         ax.set_ylabel("Number of mutants ln(N)")
         ax.set_title(f"Mutant allele frequency over time (s={self.s})")
         plt.show()
-        
-        return(self.generation_data, binom_prob_list, mut_n_list, fig) 
-    
+
+        return (self.generation_data, binom_prob_list, mut_n_list, fig)
+
 
 def build_leaf_to_root_connections(tree_mask, mut_samples):
     """
@@ -155,10 +156,10 @@ def build_leaf_to_root_connections(tree_mask, mut_samples):
 
     assert desired_number <= len(node_to_leaves[-1])
     node_to_leaves[-1] = {
-        id: set() 
+        id: set()
         for id in np.random.choice(
-            list(node_to_leaves[-1].keys()), 
-            desired_number, 
+            list(node_to_leaves[-1].keys()),
+            desired_number,
             replace=False
         )
     }
@@ -167,7 +168,7 @@ def build_leaf_to_root_connections(tree_mask, mut_samples):
     for leaf_idx in node_to_leaves[-1].keys():
         leaf_to_follow = None
         for generation_idx, generation in reversed(
-            list(enumerate(node_to_leaves[:-1]))
+                list(enumerate(node_to_leaves[:-1]))
         ):
             if not generation:  # Skip if the generation has no nodes
                 print("No mutants yet")
@@ -181,8 +182,7 @@ def build_leaf_to_root_connections(tree_mask, mut_samples):
                 )
             else:
                 parent_idx = random.choice(list(generation.keys()))
-            
-            
+
             # If the parent already has a leaf, pick it's ancestor in all previous generations to avoid cycles
             if len(node_to_leaves[generation_idx][parent_idx]) > 0:
                 leaf_to_follow = list(node_to_leaves[generation_idx][parent_idx])[0]
@@ -195,7 +195,7 @@ def build_leaf_to_root_connections(tree_mask, mut_samples):
     # Drop any non leaves that weren't connected
     # Create a dict from node coordinates to leaf coordinates
     result = {}
-    
+
     for generation_idx, generation in enumerate(node_to_leaves):
         for node_idx, leaves in generation.items():
             if generation_idx == len(node_to_leaves) - 1 or len(leaves) > 0:
@@ -203,15 +203,16 @@ def build_leaf_to_root_connections(tree_mask, mut_samples):
 
     return result
 
+
 def clusters_to_nodes(tree_clusters):
     """
-    the following function goes from a nested dictionary of clades, creates the root node, adds node to that root 
+    the following function goes from a nested dictionary of clades, creates the root node, adds node to that root
     and then establishes parent and children relationships    """
-    
+
     label_to_node = {cluster: Node(label=cluster) for cluster in tree_clusters}
     root_name = list(tree_clusters.keys())[0]
-    
-    # Connect each node with it's leaves 
+
+    # Connect each node with it's leaves
     for parent_label, leaf_labels in tree_clusters.items():
         parent_node = label_to_node[parent_label]
         for leaf_label in leaf_labels:
@@ -224,15 +225,17 @@ def clusters_to_nodes(tree_clusters):
             if node1 == node2:
                 continue
 
-            node_1_gen = int(node1.label.split(',')[0][1:]) # split the key on comma, take the first element, and remove the opening parenthesis
-            node_2_gen = int(node2.label.split(',')[0][1:]) # split the key on comma, take the first element, and remove the opening parenthesis
-            
-            if abs(node_2_gen - node_1_gen) > 1 :
+            node_1_gen = int(node1.label.split(',')[0][
+                             1:])  # split the key on comma, take the first element, and remove the opening parenthesis
+            node_2_gen = int(node2.label.split(',')[0][
+                             1:])  # split the key on comma, take the first element, and remove the opening parenthesis
+
+            if abs(node_2_gen - node_1_gen) > 1:
                 continue
-            
+
             possible_parent = node1 if len(node1.child_nodes()) > len(node2.child_nodes()) else node2
             possible_child = node2 if possible_parent is node1 else node1
-            
+
             parent_leaf_labels = {node.label for node in possible_parent.child_nodes()}
             child_leaf_labels = {node.label for node in possible_child.child_nodes()}
             is_descendant = child_leaf_labels.issubset(parent_leaf_labels)
@@ -240,7 +243,7 @@ def clusters_to_nodes(tree_clusters):
             if is_descendant and possible_child not in possible_parent.child_nodes() and possible_child.child_nodes():
                 possible_parent.add_child(possible_child)
 
-########  Remove non-direct descendants
+    ########  Remove non-direct descendants
     next_nodes = {label_to_node[root_name]}
     while next_nodes:
         node = next_nodes.pop()
@@ -257,6 +260,7 @@ def clusters_to_nodes(tree_clusters):
 
     return tree
 
+
 def assign_edge_lengths(mu, tree):
     """
     Iterate through the tree class and assign edge lengths based on a Poisson distribution with mean rate μ.
@@ -265,6 +269,7 @@ def assign_edge_lengths(mu, tree):
         length = np.random.poisson(mu)
         node.set_edge_length(length)
     return tree
+
 
 def read_observed_data(observed_data_path):
     """
@@ -278,7 +283,7 @@ def read_observed_data(observed_data_path):
     with open(tree_file) as f:
         tree_str = f.read()
     tree = treeswift.read_tree_newick(tree_str)
-    
+
     # Calculate lineage through time plot statistics
     ltt = tree.lineages_through_time()
     list_of_tuples_obs = [(key, value) for key, value in ltt.items()]
@@ -296,10 +301,8 @@ def read_observed_data(observed_data_path):
 
 
 def plot_lineage_through_time(data1, data2):
-    
-    
-    #x = np.linspace(0, 1, 10)
-    
+    # x = np.linspace(0, 1, 10)
+
     x1 = [item[0] for item in data1]
     y1 = [item[1] for item in data1]
 
@@ -310,22 +313,22 @@ def plot_lineage_through_time(data1, data2):
     colors1 = ['lightsalmon', 'lightblue', 'lightgreen', 'lightpink', 'lightyellow', 'lightcoral', 'lavender']
 
     for i in range(len(x1) - 1):
-        area1 += y1[i] * (x1[i+1] - x1[i])
-        plt.fill_between(x1[i:i+2], y1[i:i+2], step='post', alpha=0.3, color=colors1[i % len(colors1)])
+        area1 += y1[i] * (x1[i + 1] - x1[i])
+        plt.fill_between(x1[i:i + 2], y1[i:i + 2], step='post', alpha=0.3, color=colors1[i % len(colors1)])
 
     area2 = 0.0
     colors2 = ['lightgray', 'lightcyan', 'lightseagreen', 'lightcoral', 'lightpink', 'lightgreen', 'lightyellow']
 
     for i in range(len(x2) - 1):
-        area2 += y2[i] * (x2[i+1] - x2[i])
-        plt.fill_between(x2[i:i+2], y2[i:i+2], step='post', alpha=0.3, color=colors2[i % len(colors2)])
+        area2 += y2[i] * (x2[i + 1] - x2[i])
+        plt.fill_between(x2[i:i + 2], y2[i:i + 2], step='post', alpha=0.3, color=colors2[i % len(colors2)])
 
     plt1 = plt.step(x1, y1, linestyle='-', where='post', label='Data 1')
     plt2 = plt.step(x2, y2, linestyle='-', where='post', label='Data 2')
 
-    #plt1 = plt.plot(x1, y1, label='Data 1')
-    #plt2 = plt.plot(x2, y2, label='Data 2')
-    #plt.fill_between(x, y1, y2, color='darkred', alpha=0.3)
+    # plt1 = plt.plot(x1, y1, label='Data 1')
+    # plt2 = plt.plot(x2, y2, label='Data 2')
+    # plt.fill_between(x, y1, y2, color='darkred', alpha=0.3)
     plt.xlabel('Time')
     plt.ylabel('Lineage')
     plt.title('Lineage Through Time')
@@ -339,7 +342,7 @@ def plot_lineage_through_time(data1, data2):
         print(f"y1: {y1_i}, y2: {y2_i}, Absolute Difference: {abs_difference}")
         area_between_curves += abs_difference
 
-    #area_between_curves = sum(abs(y2_i - y1_i) for y1_i, y2_i in zip(y1, y2))
+    # area_between_curves = sum(abs(y2_i - y1_i) for y1_i, y2_i in zip(y1, y2))
 
     print("Area under the line (Data 1):", area1)
     print("Area under the line (Data 2):", area2)
@@ -348,16 +351,12 @@ def plot_lineage_through_time(data1, data2):
     return plt1, plt2, area_between_curves
 
 
-
-
-
-
 ##### ------------- Wright-Fisher Simulation ------------------------------ ##########
 
 def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, output_path, observed_d_path, num_retries):
     print("Simulating population...")
     # initiate population
-    popul = Population(N, generations, disease, s) 
+    popul = Population(N, generations, disease, s)
     # go from population array to tree_clusters dictionary
     gen, prob, mut, fig = popul.simulate_population()
     fig.savefig(f"{output_path}/Simulation_{num_retries}_with_mutants_in_time_(s={s}).png")
@@ -378,15 +377,15 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     phy_tree_mut = assign_edge_lengths(mu, phy_tree)
     # make tree ultrametric
     phy_tree_ult = traverse_and_run_average(phy_tree_mut)
-    # visualise tree
-    #import matplotlib.patches as patches
-    #plot = phy_tree_mut.draw(show_labels=False, handles=[white_patch])
-    #white_patch = patches.Patch(color='black', label=f"Phylogenetic tree (s={s})")
-    #plot.savefig(f"Simulation_{num_retries}_(s={s})_tree.png")
-    #normalise_tree_lengths(phy_tree_mut)
+    #  visualise tree
+    # import matplotlib.patches as patches
+    # plot = phy_tree_mut.draw(show_labels=False, handles=[white_patch])
+    # white_patch = patches.Patch(color='black', label=f"Phylogenetic tree (s={s})")
+    # plot.savefig(f"Simulation_{num_retries}_(s={s})_tree.png")
+    # normalise_tree_lengths(phy_tree_mut)
     # calculate ltt stats and plot using treeswift
     print("LTT Statistics calculating...")
-    #ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=True, export_filename=f"{output_path}/Plot_ltt(s={s}).png")
+    # ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=True, export_filename=f"{output_path}/Plot_ltt(s={s}).png")
     ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=False)
     with open(f"{output_path}/Simulation_{num_retries}_ltt_gen_tree.tsv", "w", newline='') as f:
         writer = csv.writer(f, delimiter='\t')
@@ -400,18 +399,15 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     # write data to a csv file
     with open(f"{output_path}/Simulation_{num_retries}_ltt_normalised.tsv", "w", newline='') as f:
         writer = csv.writer(f, delimiter='\t')
-        writer.writerow(["Time", "Lineages"]) # Write column headers
+        writer.writerow(["Time", "Lineages"])  # Write column headers
         writer.writerows(norm_data)
-
     print("LTT Statistics Done")
-
     print("Reading Observed Data and Calculating LTT...")
     obs_tree , obs_ltt = read_observed_data(observed_d_path)
-
     plt1t, plt2t , abc = plot_lineage_through_time(obs_ltt , norm_data)
-
     print("Aread Under the curve calculated")
     return phy_tree_ult , abc
+
 
 # results = []
 # def run_simulation_with_restart(sim_number):
@@ -428,7 +424,7 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
 
 # run_simulation_with_restart(sim_number=args.sim_number)
 
-sim_number=args.sim_number
+sim_number = args.sim_number
 num_retries = 0
 while num_retries <= sim_number:
     print(num_retries)
@@ -441,6 +437,6 @@ while num_retries <= sim_number:
     except AssertionError:
         num_retries += 1
         print("AssertionError occurred, restarting simulation...")
-        
+
 # call the function with the command-line arguments
-#result = simulate_population_and_tree(N=args.N, generations=args.generations, mut_samples=args.mut_samples, s=args.s, mu=args.mu)
+# result = simulate_population_and_tree(N=args.N, generations=args.generations, mut_samples=args.mut_samples, s=args.s, mu=args.mu)
