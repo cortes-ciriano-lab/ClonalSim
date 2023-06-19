@@ -407,6 +407,7 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
 
     print("Aread Under the curve calculated")
 
+
     #return phy_tree_ult , abc
     return phy_tree_ult , abc
 
@@ -431,6 +432,9 @@ while num_retries <= sim_number:
     print(num_retries)
     try:
         result_tree, abc_epsilon = simulate_population_and_tree(N=args.N, generations=args.generations, disease=args.disease,  mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, num_retries=num_retries)
+        # Write abc_epsilon and simulation number in a file
+        with open(f"{args.output_path}/Simulation_results_abc_epsilon.tsv", "a", newline='') as f:
+            f.write(f"{num_retries}\t{abc_epsilon}\n")
         num_retries += 1
     except AssertionError:
         num_retries += 1
