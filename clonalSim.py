@@ -300,55 +300,63 @@ def read_observed_data(observed_data_path):
     return tree, norm_ltt
 
 
-def plot_lineage_through_time(data1, data2):
-    # x = np.linspace(0, 1, 10)
+from scipy.integrate import trapz
 
-    x1 = [item[0] for item in data1]
-    y1 = [item[1] for item in data1]
+def calculate_epsilon(norm_data1, norm_data2):
+    
+    curve1 = norm_data1
+    curve2 = norm_data2
 
-    x2 = [item[0] for item in data2]
-    y2 = [item[1] for item in data2]
+    # Extract x and y values for each curve
+    x_curve1, y_curve1 = zip(*curve1)
+    x_curve2, y_curve2 = zip(*curve2)
 
-    area1 = 0.0
-    colors1 = ['lightsalmon', 'lightblue', 'lightgreen', 'lightpink', 'lightyellow', 'lightcoral', 'lavender']
+    # Create a common range of x-values
+    x_common = np.linspace(min(min(x_curve1), min(x_curve2)), max(max(x_curve1), max(x_curve2)), 1000)
 
-    for i in range(len(x1) - 1):
-        area1 += y1[i] * (x1[i + 1] - x1[i])
-        plt.fill_between(x1[i:i + 2], y1[i:i + 2], step='post', alpha=0.3, color=colors1[i % len(colors1)])
+    # Interpolate y-values for each curve at the common x-values
+    y_interp_curve1 = np.interp(x_common, x_curve1, y_curve1)
+    y_interp_curve2 = np.interp(x_common, x_curve2, y_curve2)
 
-    area2 = 0.0
-    colors2 = ['lightgray', 'lightcyan', 'lightseagreen', 'lightcoral', 'lightpink', 'lightgreen', 'lightyellow']
+    # Find intervals where one curve is above the other
+    fill_x = []
+    fill_y1 = []
+    fill_y2 = []
 
-    for i in range(len(x2) - 1):
-        area2 += y2[i] * (x2[i + 1] - x2[i])
-        plt.fill_between(x2[i:i + 2], y2[i:i + 2], step='post', alpha=0.3, color=colors2[i % len(colors2)])
+    for i in range(len(x_common) - 1):
+        if y_interp_curve1[i] >= y_interp_curve2[i]:
+            fill_x.extend([x_common[i], x_common[i + 1]])
+            fill_y1.extend([y_interp_curve1[i], y_interp_curve1[i + 1]])
+            fill_y2.extend([y_interp_curve2[i], y_interp_curve2[i + 1]])
+        else:
+            fill_x.extend([x_common[i], x_common[i + 1]])
+            fill_y1.extend([y_interp_curve2[i], y_interp_curve2[i + 1]])
+            fill_y2.extend([y_interp_curve1[i], y_interp_curve1[i + 1]])
 
-    plt1 = plt.step(x1, y1, linestyle='-', where='post', label='Data 1')
-    plt2 = plt.step(x2, y2, linestyle='-', where='post', label='Data 2')
+    # Calculate the area between the curves using the trapezoidal rule
+    area_between_curves = trapz(np.abs(np.array(fill_y1) - np.array(fill_y2)), fill_x)
 
-    # plt1 = plt.plot(x1, y1, label='Data 1')
-    # plt2 = plt.plot(x2, y2, label='Data 2')
-    # plt.fill_between(x, y1, y2, color='darkred', alpha=0.3)
-    plt.xlabel('Time')
-    plt.ylabel('Lineage')
-    plt.title('Lineage Through Time')
+    # Plotting
+    fig = plt.figure(figsize=(10, 6))
+    plt.plot(x_curve1, y_curve1, label='Curve 1')
+    plt.plot(x_curve2, y_curve2, label='Curve 2')
+    plt.fill_between(fill_x, fill_y1, fill_y2, where=np.array(fill_y1) >= np.array(fill_y2), color='blue', alpha=0.3)
+    plt.fill_between(fill_x, fill_y1, fill_y2, where=np.array(fill_y1) < np.array(fill_y2), color='red', alpha=0.3)
+    plt.xlabel('Scaled Time')
+    plt.ylabel('Lineages')
+    plt.title('LTT Curves and Area Between Them')
     plt.legend()
+    plt.grid(True)
+    plt.ylim(0)  # Set the lower limit of y-axis to 0
+    # Add the area between curves value to the plot
+    plt.text(0.6, 10, f'Area: {area_between_curves}', fontsize=12)
     plt.show()
 
-    # Calculation of area between curves
-    area_between_curves = 0
-    for y1_i, y2_i in zip(y1[:-1], y2[:-1]):
-        abs_difference = abs(y2_i - y1_i)
-        print(f"y1: {y1_i}, y2: {y2_i}, Absolute Difference: {abs_difference}")
-        area_between_curves += abs_difference
+    # Print the result
+    print("The area between the curves is:", area_between_curves)
 
-    # area_between_curves = sum(abs(y2_i - y1_i) for y1_i, y2_i in zip(y1, y2))
+    return fig, area_between_curves
 
-    print("Area under the line (Data 1):", area1)
-    print("Area under the line (Data 2):", area2)
-    print("Area between the curves:", area_between_curves)
-
-    return plt1, plt2, area_between_curves
 
 
 ##### ------------- Wright-Fisher Simulation ------------------------------ ##########
@@ -404,7 +412,8 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     print("LTT Statistics Done")
     print("Reading Observed Data and Calculating LTT...")
     obs_tree , obs_ltt = read_observed_data(observed_d_path)
-    plt1t, plt2t , abc = plot_lineage_through_time(obs_ltt , norm_data)
+    fig_abc , abc = calculate_epsilon(obs_ltt , norm_data)
+    fig_abc.savefig(f"{output_path}/Simulation_{num_retries}_with_abc_fig_(s={s}).png")
     print("Aread Under the curve calculated")
     return phy_tree_ult , abc
 
