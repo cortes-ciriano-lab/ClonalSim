@@ -435,17 +435,26 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
 
 sim_number = args.sim_number
 num_retries = 0
-while num_retries <= sim_number:
-    print(num_retries)
-    try:
-        result_tree, abc_epsilon = simulate_population_and_tree(N=args.N, generations=args.generations, disease=args.disease,  mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, observed_d_path=args.observed_data_path, num_retries=num_retries)
-        # Write abc_epsilon and simulation number in a file
-        with open(f"{args.output_path}/Simulation_results_abc_epsilon.tsv", "a", newline='') as f:
-            f.write(f"{num_retries}\t{abc_epsilon}\n")
-        num_retries += 1
-    except AssertionError:
-        num_retries += 1
-        print("AssertionError occurred, restarting simulation...")
+
+# Open the file for writing all variables
+with open(f"{args.output_path}/Simulation_results.tsv", "a", newline='') as f:
+
+    # Write the header with variable names
+    f.write("Simulation_Number\tABC_Epsilon\tN\tGenerations\tDisease\tMut_Samples\tS\tMu\tOutput_Path\tObserved_Data_Path\n")
+
+    while num_retries <= sim_number:
+        print(num_retries)
+        try:
+            result_tree, abc_epsilon = simulate_population_and_tree(N=args.N, generations=args.generations, disease=args.disease,  mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, observed_d_path=args.observed_data_path, num_retries=num_retries)
+            
+            # Write all variables and args used in the file
+            f.write(f"{num_retries}\t{abc_epsilon}\t{args.N}\t{args.generations}\t{args.disease}\t{args.mut_samples}\t{args.s}\t{args.mu}\t{args.output_path}\t{args.observed_data_path}\n")
+            
+            num_retries += 1
+        except AssertionError:
+            num_retries += 1
+            print("AssertionError occurred, restarting simulation...")
+
 
 # call the function with the command-line arguments
 # result = simulate_population_and_tree(N=args.N, generations=args.generations, mut_samples=args.mut_samples, s=args.s, mu=args.mu)
