@@ -440,7 +440,7 @@ num_retries = 0
 with open(f"{args.output_path}/Simulation_results.tsv", "a", newline='') as f:
 
     # Write the header with variable names
-    f.write("Simulation_Number\tABC_Epsilon\tN\tGenerations\tDisease\tMut_Samples\tS\tMu\tOutput_Path\tObserved_Data_Path\n")
+    f.write("ABC_Epsilon\tN\tGenerations\tDisease\tMut_Samples\tS\tMu\tOutput_Path\tObserved_Data_Path\n")
 
     while num_retries <= sim_number:
         print(num_retries)
