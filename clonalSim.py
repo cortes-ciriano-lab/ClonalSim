@@ -437,7 +437,7 @@ sim_number = args.sim_number
 num_retries = 0
 
 # Open the file for writing all variables
-with open(f"{args.output_path}/Simulation_results.tsv", "a", newline='') as f:
+with open(f"{args.output_path}/Simulation_results_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}.tsv", "a", newline='') as f:
 
     # Write the header with variable names
     f.write("ABC_Epsilon\tN\tGenerations\tDisease\tMut_Samples\tS\tMu\tOutput_Path\tObserved_Data_Path\n")
