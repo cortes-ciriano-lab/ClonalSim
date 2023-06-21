@@ -22,7 +22,7 @@ parser.add_argument("--mut_samples", type=int, help="number of mutation samples"
 parser.add_argument("--s", type=float, help="selection coefficient")
 parser.add_argument("--mu", type=float, help="mutation rate")
 # parser.add_argument("--epsilon", type=float, help="Epsilon Threshold")
-parser.add_argument("--sim_number", type=float, help="The number of simulations to run", default=1, required=False)
+parser.add_argument("--sim_number", type=float, help="The number of simulations to run internally", default=1, required=False)
 parser.add_argument('--output_path', type=str, default='.', help='output path')
 parser.add_argument('--observed_data_path', type=str, default='.', help='observed_data_path')
 
@@ -415,7 +415,7 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     print("Reading Observed Data and Calculating LTT...")
     obs_tree , obs_ltt = read_observed_data(observed_d_path)
     fig_abc , abc = calculate_epsilon(obs_ltt , norm_data)
-    if abc < 0.2:
+    if abc < 10:
         fig_abc.savefig(f"{output_path}/Simulation_{N}_{disease}_with_abc_fig_(s={s}).png")
     print("Area Under the Curve calculated")
 
