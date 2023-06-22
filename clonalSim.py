@@ -281,9 +281,9 @@ def read_observed_data(observed_data_path):
     with open(tree_file) as f:
         tree_str = f.read()
     tree = treeswift.read_tree_newick(tree_str)
-
+    obs_tree_ult = traverse_and_run_average(tree)
     # Calculate lineage through time plot statistics
-    ltt = tree.lineages_through_time()
+    ltt = obs_tree_ult.lineages_through_time(show_plot=False)
     list_of_tuples_obs = [(key, value) for key, value in ltt.items()]
     data_transformed_obs = transform_data(list_of_tuples_obs)
     norm_ltt = normalise_data(data_transformed_obs)
@@ -365,7 +365,7 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     popul = Population(N, generations, disease, s)
     # go from population array to tree_clusters dictionary
     gen, prob, mut, fig = popul.simulate_population()
-    fig.savefig(f"{output_path}/Simulation_{num_retries}_with_mutants_in_time_(s={s}).png")
+    #fig.savefig(f"{output_path}/Simulation_{num_retries}_with_mutants_in_time_(s={s}).png")
     print("Population Done...")
     # create genealogy and save in tree_clusters
     print("Simulating Genealogy...")
@@ -391,8 +391,8 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     # normalise_tree_lengths(phy_tree_mut)
     # calculate ltt stats and plot using treeswift
     print("LTT Statistics calculating...")
-    # ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=True, export_filename=f"{output_path}/Plot_ltt(s={s}).png")
-    ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=False)
+    ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=True, export_filename=f"{output_path}/Plot_ltt(s={s}).png")
+    #ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=False)
     with open(f"{output_path}/Simulation_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_ltt_gen_tree.tsv", "w", newline='') as f:
         writer = csv.writer(f, delimiter='\t')
         for key, value in ltt_gen_tree.items():
@@ -413,7 +413,7 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     print("Reading Observed Data and Calculating LTT...")
     obs_tree , obs_ltt = read_observed_data(observed_d_path)
     fig_abc , abc = calculate_epsilon(obs_ltt , norm_data)
-    if abc < 10:
+    if abc < 1:
         fig_abc.savefig(f"{output_path}/Simulation_{N}_{disease}_with_abc_fig_(s={s}).png")
     print("Area Under the Curve calculated")
 
