@@ -225,10 +225,8 @@ def clusters_to_nodes(tree_clusters):
             if node1 == node2:
                 continue
 
-            node_1_gen = int(node1.label.split(',')[0][
-                             1:])  # split the key on comma, take the first element, and remove the opening parenthesis
-            node_2_gen = int(node2.label.split(',')[0][
-                             1:])  # split the key on comma, take the first element, and remove the opening parenthesis
+            node_1_gen = int(node1.label.split(',')[0][1:])  # split the key on comma, take the first element, and remove the opening parenthesis
+            node_2_gen = int(node2.label.split(',')[0][1:])  # split the key on comma, take the first element, and remove the opening parenthesis
 
             if abs(node_2_gen - node_1_gen) > 1:
                 continue
@@ -415,7 +413,7 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     print("Reading Observed Data and Calculating LTT...")
     obs_tree , obs_ltt = read_observed_data(observed_d_path)
     fig_abc , abc = calculate_epsilon(obs_ltt , norm_data)
-    if abc < 16:
+    if abc < 1:
         fig_abc.savefig(f"{output_path}/Simulation_{N}_{disease}_with_abc_fig_(s={s}).png")
     print("Area Under the Curve calculated")
 
