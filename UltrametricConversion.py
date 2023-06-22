@@ -127,8 +127,20 @@ def average_subtree(tree_obj, subtree_side):
 
 def traverse_and_run_average(tree_obj):
     for n in tree_obj.traverse_postorder(leaves=False):
-        if n.is_root():
+        children_n = n.child_nodes()
+        
+        if n.is_root() and all(child.is_leaf() for child in children_n):
+            print("All children are leaves, performing operation...")
+            subtree = tree_obj.extract_subtree(n)
+            subtree.draw()
+            new_branch_length = subtree.avg_branch_length()
+            print(new_branch_length)
+            # now update the edge lengths on the tree
+            for node in tree_obj.traverse_postorder(internal=False):
+                node.set_edge_length(length=new_branch_length)
+        elif n.is_root():
             continue
+
         parent = n.get_parent()
         if parent == tree_obj.root and n.is_leaf() and n.get_edge_length() == 0:
             print("Node with zero length right after root found")

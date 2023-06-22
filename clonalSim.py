@@ -378,9 +378,11 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     print("Genealogy Done")
     # assign random edge (branch) lengths
     phy_tree_mut = assign_edge_lengths(mu, phy_tree)
+    phy_tree_mut.write_tree_newick(f"{output_path}/Simulation_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_output_gen_tree.nwk", hide_rooted_prefix=False)
     # make tree ultrametric
-    phy_tree_ult = traverse_and_run_average(phy_tree_mut)
-    phy_tree_ult.write_tree_newick(f"{output_path}/Simulation_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_output_gen_tree.nwk", hide_rooted_prefix=True)
+    phy_tree_mut = traverse_and_run_average(phy_tree_mut)
+    print("Ultrametric tree done")
+    phy_tree_mut.draw(show_plot=True, export_filename=f"{output_path}/Plot_tree_ultrametric_(s={s}).png")
     print("Tree Saved")
     #  visualise tree
     # import matplotlib.patches as patches
@@ -443,17 +445,38 @@ with open(f"{args.output_path}/Simulation_results_{args.N}_{args.generations}_{a
     # Write the header with variable names
     f.write("ABC_Epsilon\tN\tGenerations\tDisease\tMut_Samples\tS\tMu\tOutput_Path\tObserved_Data_Path\n")
 
-    while True:
-        print(num_retries)
+    max_retries = 10
+    retry_count = 0
+
+    while retry_count < max_retries:
+        print("FOREVER LOOP")
         try:
             result_tree, abc_epsilon = simulate_population_and_tree(N=args.N, generations=args.generations, disease=args.disease,  mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, observed_d_path=args.observed_data_path, num_retries=num_retries)
-            
+                
             # Write all variables and args used in the file
             f.write(f"{abc_epsilon}\t{args.N}\t{args.generations}\t{args.disease}\t{args.mut_samples}\t{args.s}\t{args.mu}\t{args.output_path}\t{args.observed_data_path}\n")
             
             break
         except AssertionError:
             print("AssertionError occurred, restarting simulation...")
+            retry_count += 1
+
+    if retry_count == max_retries:
+        print("Max retries reached, exiting.")
+    # Handle the case when max retries are reached
+
+
+    # while True:
+    #     print("FOREVER LOOP")
+    #     try:
+    #         result_tree, abc_epsilon = simulate_population_and_tree(N=args.N, generations=args.generations, disease=args.disease,  mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, observed_d_path=args.observed_data_path, num_retries=num_retries)
+            
+    #         # Write all variables and args used in the file
+    #         f.write(f"{abc_epsilon}\t{args.N}\t{args.generations}\t{args.disease}\t{args.mut_samples}\t{args.s}\t{args.mu}\t{args.output_path}\t{args.observed_data_path}\n")
+            
+    #         break
+    #     except AssertionError:
+    #         print("AssertionError occurred, restarting simulation...")
 
 
 # call the function with the command-line arguments
