@@ -281,9 +281,9 @@ def read_observed_data(observed_data_path):
     with open(tree_file) as f:
         tree_str = f.read()
     tree = treeswift.read_tree_newick(tree_str)
-    obs_tree_ult = traverse_and_run_average(tree)
+    traverse_and_run_average(tree)
     # Calculate lineage through time plot statistics
-    ltt = obs_tree_ult.lineages_through_time(show_plot=True, export_filename=f"{output_path}/Plot_obs_ltt_ultrametric_(s={s}).png")
+    ltt = tree.lineages_through_time(show_plot=True, export_filename=f"{output_path}/Plot_obs_ltt_ultrametric_(s={s}).png")
     list_of_tuples_obs = [(key, value) for key, value in ltt.items()]
     data_transformed_obs = transform_data(list_of_tuples_obs)
     norm_ltt = normalise_data(data_transformed_obs)
