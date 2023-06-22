@@ -374,15 +374,14 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     gen_tree = clusters_to_nodes(tree_clusters)
     from treeswift import read_tree_newick
     tree_string = gen_tree.newick()
-    print("Tree Done")
-    # read newick tree
     phy_tree = read_tree_newick(tree_string)
-    phy_tree.write_tree_newick(f"{output_path}/Simulation_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_output_gen_tree.nwk", hide_rooted_prefix=True)
-    print("Tree Saved")
+    print("Genealogy Done")
     # assign random edge (branch) lengths
     phy_tree_mut = assign_edge_lengths(mu, phy_tree)
     # make tree ultrametric
     phy_tree_ult = traverse_and_run_average(phy_tree_mut)
+    phy_tree_ult.write_tree_newick(f"{output_path}/Simulation_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_output_gen_tree.nwk", hide_rooted_prefix=True)
+    print("Tree Saved")
     #  visualise tree
     # import matplotlib.patches as patches
     # plot = phy_tree_mut.draw(show_labels=False, handles=[white_patch])
