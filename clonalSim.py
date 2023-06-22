@@ -380,7 +380,7 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     phy_tree_mut = assign_edge_lengths(mu, phy_tree)
     phy_tree_mut.write_tree_newick(f"{output_path}/Simulation_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_output_gen_tree.nwk", hide_rooted_prefix=False)
     # make tree ultrametric
-    phy_tree_mut = traverse_and_run_average(phy_tree_mut)
+    traverse_and_run_average(phy_tree_mut)
     print("Ultrametric tree done")
     phy_tree_mut.draw(show_plot=True, export_filename=f"{output_path}/Plot_tree_ultrametric_(s={s}).png")
     print("Tree Saved")
