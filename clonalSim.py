@@ -269,7 +269,7 @@ def assign_edge_lengths(mu, tree):
     return tree
 
 
-def read_observed_data(observed_data_path):
+def read_observed_data(observed_data_path, output_path):
     """
     Read observed tree and calculate LTT statistics and return or read in LTT statistics straight
     """
@@ -412,7 +412,7 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     print("LTT Normalised Saved")
 
     print("Reading Observed Data and Calculating LTT...")
-    obs_tree , obs_ltt = read_observed_data(observed_d_path)
+    obs_tree , obs_ltt = read_observed_data(observed_d_path, output_path)
     fig_abc , abc = calculate_epsilon(obs_ltt , norm_data)
     if abc < 10:
         fig_abc.savefig(f"{output_path}/Simulation_{N}_{disease}_with_abc_fig_(s={s}).png")
