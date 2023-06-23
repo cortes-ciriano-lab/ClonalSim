@@ -132,7 +132,7 @@ class Population:
         ax.set_xlabel("Time in Generations")
         ax.set_ylabel("Number of mutants ln(N)")
         ax.set_title(f"Mutant allele frequency over time (s={self.s})")
-        
+
         return (self.generation_data, binom_prob_list, mut_n_list, fig)
 
 
@@ -333,8 +333,8 @@ def calculate_epsilon(norm_data1, norm_data2):
 
     # Plotting
     fig = plt.figure(figsize=(10, 6))
-    plt.plot(x_curve1, y_curve1, label='Curve 1')
-    plt.plot(x_curve2, y_curve2, label='Curve 2')
+    plt.plot(x_curve1, y_curve1, label='MPN tree')
+    plt.plot(x_curve2, y_curve2, label='Simulation')
     plt.fill_between(fill_x, fill_y1, fill_y2, where=np.array(fill_y1) >= np.array(fill_y2), color='blue', alpha=0.3)
     plt.fill_between(fill_x, fill_y1, fill_y2, where=np.array(fill_y1) < np.array(fill_y2), color='red', alpha=0.3)
     plt.xlabel('Scaled Time')
