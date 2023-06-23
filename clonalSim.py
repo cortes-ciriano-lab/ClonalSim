@@ -282,8 +282,8 @@ def read_observed_data(observed_data_path, output_path, s):
     # Calculate lineage through time plot statistics
     ltt = tree.lineages_through_time(show_plot=True, export_filename=f"{output_path}/Plot_obs_ltt_ultrametric_(s={s}).png")
     list_of_tuples_obs = [(key, value) for key, value in ltt.items()]
-    data_transformed_obs = normalise_data(list_of_tuples_obs)
-    norm_ltt = transform_data(data_transformed_obs)
+    data_transformed_obs = transform_data(list_of_tuples_obs)
+    norm_ltt = normalise_data(data_transformed_obs)
 
     # Save the results in a data structure
     results = {
