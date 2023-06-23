@@ -237,7 +237,7 @@ def normalise_data(data):
         current_x, current_y = data[i]
         
         # Normalise the 0th element of the tuple with the last 0th element of the data
-        current_x = current_x / data[-1][0]
+        current_x = current_x / data[-2][0]
         
         data_norm.append((current_x, current_y))
     
