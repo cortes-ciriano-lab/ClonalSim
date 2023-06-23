@@ -390,27 +390,27 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     print("LTT Statistics calculating...")
     ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=True, export_filename=f"{output_path}/Plot_ltt_ultrametric_(s={s}).png")
     #ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=False)
-    with open(f"{output_path}/Simulation_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_ltt_gen_tree.tsv", "w", newline='') as f:
-        writer = csv.writer(f, delimiter='\t')
-        for key, value in ltt_gen_tree.items():
-            writer.writerow([key, value])
+    # with open(f"{output_path}/Simulation_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_ltt_gen_tree.tsv", "w", newline='') as f:
+    #     writer = csv.writer(f, delimiter='\t')
+    #     for key, value in ltt_gen_tree.items():
+    #         writer.writerow([key, value])
     print("LTT Saved")
     # normalise ltt stats
     list_of_tuples_tree = [(key, value) for key, value in ltt_gen_tree.items()]
     data_transformed = transform_data(list_of_tuples_tree)
     norm_data = normalise_data(data_transformed)
     # write data to a csv file
-    with open(f"{output_path}/Simulation_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_ltt_normalised.tsv", "w", newline='') as f:
-        writer = csv.writer(f, delimiter='\t')
-        writer.writerow(["Time", "Lineages"])  # Write column headers
-        writer.writerows(norm_data)
+    # with open(f"{output_path}/Simulation_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_ltt_normalised.tsv", "w", newline='') as f:
+    #     writer = csv.writer(f, delimiter='\t')
+    #     writer.writerow(["Time", "Lineages"])  # Write column headers
+    #     writer.writerows(norm_data)
     print("LTT Statistics Done")
     print("LTT Normalised Saved")
 
     print("Reading Observed Data and Calculating LTT...")
     obs_tree , obs_ltt = read_observed_data(observed_d_path, output_path, s)
     fig_abc , abc = calculate_epsilon(obs_ltt , norm_data)
-    if abc < 10:
+    if abc < 1:
         fig_abc.savefig(f"{output_path}/Simulation_{N}_{disease}_with_abc_fig_(s={s}).png")
     print("Area Under the Curve calculated")
 
