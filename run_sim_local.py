@@ -16,7 +16,7 @@ os.system(make_logs)
 # Function to run simulations
 def run_simulation():
     # Draw s from a uniform distribution on (0, 2).
-    s = np.random.uniform(1.9, 2)
+    s = np.random.uniform(0.5, 1)
 
     # Draw N from 10X, where X is uniformly distributed on (1, 9).
     X = np.random.uniform(1, 9)
@@ -59,7 +59,7 @@ def run_simulation():
     return s, N, L, g, k, mutation_rate
 
 # Number of simulations
-num_simulations = 4
+num_simulations = 10
 
 # Run simulations
 for sim_num in range(num_simulations):

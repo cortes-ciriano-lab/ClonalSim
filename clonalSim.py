@@ -93,7 +93,6 @@ class Population:
                         ax.set_xlabel("Time in Generations")
                         ax.set_ylabel("Number of mutants ln(N)")
                         ax.set_title(f"Mutant allele frequency over time (s={self.s})")
-                        plt.show()
                         return (self.generation_data, binom_prob_list, mut_n_list, fig)
 
                     self.generation_data.append(offspring)
@@ -119,7 +118,6 @@ class Population:
         #         ax.set_xlabel("Time in Generations")
         #         ax.set_ylabel("Number of mutants ln(N)")
         #         ax.set_title(f"Mutant allele frequency over time (s={self.s})")
-        #         plt.show()
         #         return(self.generation_data, binom_prob_list, mut_n_list, fig)
 
         #     self.generation_data.append(offspring)
@@ -134,8 +132,7 @@ class Population:
         ax.set_xlabel("Time in Generations")
         ax.set_ylabel("Number of mutants ln(N)")
         ax.set_title(f"Mutant allele frequency over time (s={self.s})")
-        plt.show()
-
+        
         return (self.generation_data, binom_prob_list, mut_n_list, fig)
 
 
@@ -348,7 +345,6 @@ def calculate_epsilon(norm_data1, norm_data2):
     plt.ylim(0)  # Set the lower limit of y-axis to 0
     # Add the area between curves value to the plot
     plt.text(0.6, 10, f'Area: {area_between_curves}', fontsize=12)
-    plt.show()
 
     # Print the result
     print("The area between the curves is:", area_between_curves)
@@ -418,7 +414,7 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
         fig_abc.savefig(f"{output_path}/Simulation_{N}_{disease}_with_abc_fig_(s={s}).png")
     print("Area Under the Curve calculated")
 
-    return phy_tree_ult , abc
+    return phy_tree_mut , abc
 
 
 # results = []
