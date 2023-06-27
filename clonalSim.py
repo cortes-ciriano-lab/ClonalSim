@@ -408,7 +408,7 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     print("Reading Observed Data and Calculating LTT...")
     obs_tree , obs_ltt = read_observed_data(observed_d_path, output_path, s)
     fig_abc , abc = calculate_epsilon(obs_ltt , norm_data)
-    if abc < 1:
+    if abc < 10:
         fig_abc.savefig(f"{output_path}/Simulation_{N}_{disease}_with_abc_fig_(s={s}).png")
     print("Area Under the Curve calculated")
 
