@@ -16,15 +16,15 @@ parser = argparse.ArgumentParser(description="Simulate population and tree")
 
 # add arguments for the simulation parameters
 parser.add_argument("--N", type=int, help="population size")
-parser.add_argument("--generations", type=int, help="number of generations to simulate")
+parser.add_argument("--generations", type=int, required=False, help="number of generations to simulate")
 parser.add_argument("--disease", type=int, help="number of generations the disease starts")
-parser.add_argument("--mut_samples", type=int, help="number of mutation samples")
+parser.add_argument("--mut_samples", type=int, required=False, help="number of mutation samples")
 parser.add_argument("--s", type=float, help="selection coefficient")
 parser.add_argument("--mu", type=float, help="mutation rate")
 # parser.add_argument("--epsilon", type=float, help="Epsilon Threshold")
 parser.add_argument("--sim_number", type=float, help="The number of simulations to run internally", default=1, required=False)
 parser.add_argument('--output_path', type=str, default='.', help='output path')
-parser.add_argument('--observed_data_path', type=str, default='.', help='observed_data_path')
+parser.add_argument('--observed_data_path', type=str, default='.', help='observed_data_path', required=False)
 
 
 # parse the command-line arguments
@@ -222,11 +222,11 @@ def clusters_to_nodes(tree_clusters):
             if node1 == node2:
                 continue
 
-            node_1_gen = int(node1.label.split(',')[0][1:])  # split the key on comma, take the first element, and remove the opening parenthesis
-            node_2_gen = int(node2.label.split(',')[0][1:])  # split the key on comma, take the first element, and remove the opening parenthesis
+            # node_1_gen = int(node1.label.split(',')[0][1:])  # split the key on comma, take the first element, and remove the opening parenthesis
+            # node_2_gen = int(node2.label.split(',')[0][1:])  # split the key on comma, take the first element, and remove the opening parenthesis
 
-            if abs(node_2_gen - node_1_gen) > 1:
-                continue
+            # if abs(node_2_gen - node_1_gen) > 1:
+            #     continue
 
             possible_parent = node1 if len(node1.child_nodes()) > len(node2.child_nodes()) else node2
             possible_child = node2 if possible_parent is node1 else node1
@@ -374,18 +374,13 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     print("Genealogy Done")
     # assign random edge (branch) lengths
     phy_tree_mut = assign_edge_lengths(mu, phy_tree)
+    # save simulated tree
     phy_tree_mut.write_tree_newick(f"{output_path}/Simulation_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_output_gen_tree.nwk", hide_rooted_prefix=False)
     # make tree ultrametric
     traverse_and_run_average(phy_tree_mut)
     print("Ultrametric tree done")
     phy_tree_mut.draw(show_plot=True, export_filename=f"{output_path}/Plot_tree_ultrametric_(s={s}).png")
     print("Tree Saved")
-    #  visualise tree
-    # import matplotlib.patches as patches
-    # plot = phy_tree_mut.draw(show_labels=False, handles=[white_patch])
-    # white_patch = patches.Patch(color='black', label=f"Phylogenetic tree (s={s})")
-    # plot.savefig(f"Simulation_{num_retries}_(s={s})_tree.png")
-    # normalise_tree_lengths(phy_tree_mut)
     # calculate ltt stats and plot using treeswift
     print("LTT Statistics calculating...")
     ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=True, export_filename=f"{output_path}/Plot_ltt_ultrametric_(s={s}).png")
@@ -394,72 +389,78 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     #     writer = csv.writer(f, delimiter='\t')
     #     for key, value in ltt_gen_tree.items():
     #         writer.writerow([key, value])
-    print("LTT Saved")
+    #print("LTT Saved")
+    
     # normalise ltt stats
     list_of_tuples_tree = [(key, value) for key, value in ltt_gen_tree.items()]
     data_transformed = transform_data(list_of_tuples_tree)
     norm_data = normalise_data(data_transformed)
+
     # write data to a csv file
     # with open(f"{output_path}/Simulation_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_ltt_normalised.tsv", "w", newline='') as f:
     #     writer = csv.writer(f, delimiter='\t')
     #     writer.writerow(["Time", "Lineages"])  # Write column headers
     #     writer.writerows(norm_data)
     print("LTT Statistics Done")
-    print("LTT Normalised Saved")
+    
+    #print("LTT Normalised Saved")
 
     print("Reading Observed Data and Calculating LTT...")
     obs_tree , obs_ltt = read_observed_data(observed_d_path, output_path, s)
     fig_abc , abc = calculate_epsilon(obs_ltt , norm_data)
-    if abc < 1000:
+    if abc < 1:
         fig_abc.savefig(f"{output_path}/Simulation_{N}_{disease}_with_abc_fig_(s={s}).png")
     print("Area Under the Curve calculated")
 
     return phy_tree_mut , abc
 
 
-# results = []
-# def run_simulation_with_restart(sim_number):
-#     num_retries = 0
-#     while num_retries <= sim_number:
-#         print(num_retries)
-#         try:
-#             result = simulate_population_and_tree(N=args.N, generations=args.generations, disease=args.disease,  mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, num_retries=num_retries)
-#             results.append(result)
-#             num_retries += 1
-#         except AssertionError:
-#             num_retries += 1
-#             print("AssertionError occurred, restarting simulation...")
+results = []
+def run_simulation_with_restart(sim_number):
+    num_retries = 0
+    while num_retries <= sim_number:
+        print(num_retries)
+        try:
+            result = simulate_population_and_tree(N=args.N, generations=args.generations, disease=args.disease,  mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, num_retries=num_retries, observed_d_path=args.observed_data_path )
+            results.append(result)
+            num_retries += 1
+        except AssertionError:
+            num_retries += 1
+            print("AssertionError occurred, restarting simulation...")
 
-# run_simulation_with_restart(sim_number=args.sim_number)
+run_simulation_with_restart(sim_number=args.sim_number)
 
-sim_number = args.sim_number
-num_retries = 0
+
+
+
+# sim_number = args.sim_number
+# num_retries = 0
 
 # Open the file for writing all variables
-with open(f"{args.output_path}/Simulation_results_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}.tsv", "a", newline='') as f:
+# with open(f"{args.output_path}/Simulation_results_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}.tsv", "a", newline='') as f:
 
-    # Write the header with variable names
-    f.write("ABC_Epsilon\tN\tGenerations\tDisease\tMut_Samples\tS\tMu\tOutput_Path\tObserved_Data_Path\n")
+#     # Write the header with variable names
+#     f.write("ABC_Epsilon\tN\tGenerations\tDisease\tMut_Samples\tS\tMu\tOutput_Path\tObserved_Data_Path\n")
 
-    max_retries = 10
-    retry_count = 0
+#     max_retries = 2
+#     retry_count = 0
 
-    while retry_count < max_retries:
-        print("FOREVER LOOP")
-        try:
-            result_tree, abc_epsilon = simulate_population_and_tree(N=args.N, generations=args.generations, disease=args.disease,  mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, observed_d_path=args.observed_data_path, num_retries=num_retries)
+#     while retry_count < max_retries:
+#         print("FOREVER LOOP")
+#         try:
+#             result_tree, abc_epsilon = simulate_population_and_tree(N=args.N, generations=args.generations, disease=args.disease,  mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, observed_d_path=args.observed_data_path, num_retries=num_retries)
                 
-            # Write all variables and args used in the file
-            f.write(f"{abc_epsilon}\t{args.N}\t{args.generations}\t{args.disease}\t{args.mut_samples}\t{args.s}\t{args.mu}\t{args.output_path}\t{args.observed_data_path}\n")
+#             # Write all variables and args used in the file
+#             f.write(f"{abc_epsilon}\t{args.N}\t{args.generations}\t{args.disease}\t{args.mut_samples}\t{args.s}\t{args.mu}\t{args.output_path}\t{args.observed_data_path}\n")
             
-            break
-        except AssertionError:
-            print("AssertionError occurred, restarting simulation...")
-            retry_count += 1
+#             break
+#         except AssertionError:
+#             print("AssertionError occurred, restarting simulation...")
+#             retry_count += 1
 
-    if retry_count == max_retries:
-        print("Max retries reached, exiting.")
-    # Handle the case when max retries are reached
+#     if retry_count == max_retries:
+#         print("Max retries reached, exiting.")
+#     # Handle the case when max retries are reached
 
 
     # while True:
