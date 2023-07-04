@@ -206,11 +206,16 @@ def clusters_to_nodes(tree_clusters):
     the following function goes from a nested dictionary of clades, creates the root node, adds node to that root
     and then establishes parent and children relationships    """
 
+def clusters_to_nodes(tree_clusters):
+    '''
+    the following function goes from a nested dictionary of clades_ creates the root node_ adds node to that root
+    and then establishes parent and children relationships    '''
+
     label_to_node = {cluster: Node(label=cluster) for cluster in tree_clusters}
     root_name = list(tree_clusters.keys())[0]
 
     # Connect each node with it's leaves
-    for parent_label, leaf_labels in tree_clusters.items():
+    for parent_label,leaf_labels in tree_clusters.items():
         parent_node = label_to_node[parent_label]
         for leaf_label in leaf_labels:
             leaf_node = label_to_node[leaf_label]
@@ -221,13 +226,7 @@ def clusters_to_nodes(tree_clusters):
         for node2 in label_to_node.values():
             if node1 == node2:
                 continue
-
-            # node_1_gen = int(node1.label.split(',')[0][1:])  # split the key on comma, take the first element, and remove the opening parenthesis
-            # node_2_gen = int(node2.label.split(',')[0][1:])  # split the key on comma, take the first element, and remove the opening parenthesis
-
-            # if abs(node_2_gen - node_1_gen) > 1:
-            #     continue
-
+            
             possible_parent = node1 if len(node1.child_nodes()) > len(node2.child_nodes()) else node2
             possible_child = node2 if possible_parent is node1 else node1
 
@@ -237,17 +236,37 @@ def clusters_to_nodes(tree_clusters):
 
             if is_descendant and possible_child not in possible_parent.child_nodes() and possible_child.child_nodes():
                 possible_parent.add_child(possible_child)
+    
+    
+    # Create a list of all leaf nodes
+    leaf_nodes = [node for node in label_to_node.values() if not node.child_nodes()]
 
-    ########  Remove non-direct descendants
-    next_nodes = {label_to_node[root_name]}
-    while next_nodes:
-        node = next_nodes.pop()
-        for child in node.child_nodes():
-            next_nodes.add(child)
-            child.set_parent(node)
-            for grandchild in child.child_nodes():
-                if grandchild in node.child_nodes():
-                    node.remove_child(grandchild)
+    # Loop through generations in reverse order (from leaves to root)
+    for gen in reversed(range(int(root_name.split('_')[0]), max([int(node.label.split('_')[0]) for node in label_to_node.values()]))):
+
+        # Iterate over nodes that are in the current generation
+        for node in [n for n in label_to_node.values() if int(n.label.split('_')[0]) == gen]:
+
+            # Inspect all children of the current node
+            for child in node.child_nodes():
+
+                # If the child is a leaf and it is also a child of any node from a higher generation
+                if not child.child_nodes() and any(child in higher_gen_node.child_nodes() for higher_gen_node in label_to_node.values() if int(higher_gen_node.label.split('_')[0]) > gen):
+                    
+                    # Remove the child from the current node
+                    node.remove_child(child)
+
+    # Connect orphaned leaf nodes to their last associated generation node
+
+    for leaf in leaf_nodes:
+
+        # Find the last generation this leaf node is associated with
+        last_gen_node_label = max([node for node in tree_clusters if leaf.label in tree_clusters[node]], key=lambda x: int(x.split('_')[0]))
+
+        # If the leaf node is not in the tree, add it to the last generation node
+        if leaf not in label_to_node[last_gen_node_label].child_nodes():
+            label_to_node[last_gen_node_label].add_child(leaf)
+
 
     # Create the tree using TreeSwift
     tree = Tree()
@@ -455,7 +474,6 @@ with open(f"{args.output_path}/Simulation_results_{args.N}_{args.generations}_{a
             print("AssertionError occurred, restarting simulation...")
             retry_count += 1
     # while True:
-    #     print("FOREVER LOOP")
     #     try:
     #         result_tree, abc_epsilon = simulate_population_and_tree(N=args.N, generations=args.generations, disease=args.disease,  mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, observed_d_path=args.observed_data_path, num_retries=num_retries)
             
