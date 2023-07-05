@@ -196,7 +196,13 @@ def build_leaf_to_root_connections(tree_mask, mut_samples):
     for generation_idx, generation in enumerate(node_to_leaves):
         for node_idx, leaves in generation.items():
             if generation_idx == len(node_to_leaves) - 1 or len(leaves) > 0:
-                result[str((generation_idx, node_idx))] = {str(leaf) for leaf in leaves}
+                result_key = f"{generation_idx}_{node_idx}"
+                result_value = {f"{leaf[0]}_{leaf[1]}" for leaf in leaves}
+                result[result_key] = result_value
+    # for generation_idx, generation in enumerate(node_to_leaves):
+    #     for node_idx, leaves in generation.items():
+    #         if generation_idx == len(node_to_leaves) - 1 or len(leaves) > 0:
+    #             result[str((generation_idx, node_idx))] = {str(leaf) for leaf in leaves}
 
     return result
 
