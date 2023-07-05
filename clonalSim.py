@@ -276,11 +276,12 @@ def clusters_to_nodes(tree_clusters):
     # Set the string_rep attribute for each node
     for label, node in label_to_node.items():
         node.string_rep = str(label) 
-        
+
     # Create the tree using TreeSwift
     tree = Tree()
     tree.root = label_to_node[root_name]
-
+    tree.is_rooted = True
+    
     return tree
 
 
