@@ -10,6 +10,7 @@ import csv
 from UltrametricConversion import traverse_and_run_average
 from UltrametricConversion import transform_data
 from UltrametricConversion import normalise_data
+from typing import Dict, Iterable
 
 # create an argparse parser
 parser = argparse.ArgumentParser(description="Simulate population and tree")
@@ -137,10 +138,10 @@ class Population:
 
 
 def build_leaf_to_root_connections(tree_mask, mut_samples):
-    """
+    '''
     Simulate the population using the Wright-Fisher model with selection.
-    """
-    # List of each generation, where each generation is a dict from node_idx to set of leaves
+    '''
+    # List of each generation_ where each generation is a dict from node_idx to set of leaves
     node_to_leaves = []
     desired_number = mut_samples
 
@@ -161,16 +162,16 @@ def build_leaf_to_root_connections(tree_mask, mut_samples):
         )
     }
 
-    # Go backward from leaf to root, randomly assigning each leaf to a parent
-    for leaf_idx in node_to_leaves[-1].keys():
+    # Go backward from leaf to root_ randomly assigning each leaf to a parent
+    for leaf_idx in node_to_leaves[-1].keys(): # this loop iterates over each leaf
         leaf_to_follow = None
-        for generation_idx, generation in reversed(
+        for generation_idx, generation in reversed( # this inner loop traverses the generations in reverse order_ excluding the most recent one.
                 list(enumerate(node_to_leaves[:-1]))
         ):
             if not generation:  # Skip if the generation has no nodes
-                print("No mutants yet")
+                print('No mutants yet')
                 continue
-            # If we already have a leaf to follow, pick it's ancestor, otherwise pick a random one
+                # If we already have a leaf to follow_ pick it's ancestor_ otherwise pick a random one
             if leaf_to_follow is not None:
                 parent_idx = next(
                     node
@@ -180,7 +181,7 @@ def build_leaf_to_root_connections(tree_mask, mut_samples):
             else:
                 parent_idx = random.choice(list(generation.keys()))
 
-            # If the parent already has a leaf, pick it's ancestor in all previous generations to avoid cycles
+            # If the parent already has a leaf_ pick it's ancestor in all previous generations to avoid cycles
             if len(node_to_leaves[generation_idx][parent_idx]) > 0:
                 leaf_to_follow = list(node_to_leaves[generation_idx][parent_idx])[0]
 
@@ -191,98 +192,65 @@ def build_leaf_to_root_connections(tree_mask, mut_samples):
 
     # Drop any non leaves that weren't connected
     # Create a dict from node coordinates to leaf coordinates
-    result = {}
+    leaves_to_nodes = {}  # Dictionary to store the mapping from leaf coordinates to node coordinates
 
     for generation_idx, generation in enumerate(node_to_leaves):
         for node_idx, leaves in generation.items():
             if generation_idx == len(node_to_leaves) - 1 or len(leaves) > 0:
                 result_key = f"{generation_idx}_{node_idx}"
-                result_value = {f"{leaf[0]}_{leaf[1]}" for leaf in leaves}
-                result[result_key] = result_value
+                for leaf in leaves:
+                    if str(leaf) in leaves_to_nodes:
+                        leaves_to_nodes[str(leaf)].append(result_key)
+                    else:
+                        leaves_to_nodes[str(leaf)] = [result_key]
+
+
+    # result = {}
+
     # for generation_idx, generation in enumerate(node_to_leaves):
     #     for node_idx, leaves in generation.items():
     #         if generation_idx == len(node_to_leaves) - 1 or len(leaves) > 0:
-    #             result[str((generation_idx, node_idx))] = {str(leaf) for leaf in leaves}
+    #             result_key = f"{generation_idx}_{node_idx}"
+    #             result_value = {f"{leaf[0]}_{leaf[1]}" for leaf in leaves}
+    #             #result_value = {f"{str(leaf)}" for leaf in leaves}
+    #             result[result_key] = result_value
 
-    return result
+    return leaves_to_nodes
 
 
-def clusters_to_nodes(tree_clusters):
+def clusters_to_nodes(tree_clusters: Dict[Node, Iterable[Node]]) -> Tree:
     """
-    the following function goes from a nested dictionary of clades, creates the root node, adds node to that root
-    and then establishes parent and children relationships    """
+    Input: Dictionary from Leaf nodes to a list of nodes from that leaf to the root
+    Output: Tree Object, all nodes with immediate parent and children 
+    """
+    label_to_node = {leaf: Node(label=leaf) for leaf in tree_clusters}
 
-def clusters_to_nodes(tree_clusters):
-    '''
-    the following function goes from a nested dictionary of clades_ creates the root node_ adds node to that root
-    and then establishes parent and children relationships    '''
+    for leaf_label, parent_labels in tree_clusters.items():
+        leaf_node = label_to_node[leaf_label]
+        prev_parent = leaf_node
+        for parent_label in reversed(parent_labels):
+            parent_node = label_to_node.get(parent_label)
+            if parent_node is None:
+                parent_node = Node(label=parent_label)
+                label_to_node[parent_label] = parent_node
 
-    label_to_node = {cluster: Node(label=cluster) for cluster in tree_clusters}
-    root_name = list(tree_clusters.keys())[0]
-
-    # Connect each node with it's leaves
-    for parent_label,leaf_labels in tree_clusters.items():
-        parent_node = label_to_node[parent_label]
-        for leaf_label in leaf_labels:
-            leaf_node = label_to_node[leaf_label]
-            parent_node.add_child(leaf_node)
-
-    # Connect each node with all descendants
-    for node1 in label_to_node.values():
-        for node2 in label_to_node.values():
-            if node1 == node2:
-                continue
-            
-            possible_parent = node1 if len(node1.child_nodes()) > len(node2.child_nodes()) else node2
-            possible_child = node2 if possible_parent is node1 else node1
-
-            parent_leaf_labels = {node.label for node in possible_parent.child_nodes()}
-            child_leaf_labels = {node.label for node in possible_child.child_nodes()}
-            is_descendant = child_leaf_labels.issubset(parent_leaf_labels)
-
-            if is_descendant and possible_child not in possible_parent.child_nodes() and possible_child.child_nodes():
-                possible_parent.add_child(possible_child)
+            # Connect the new parent to its child (Previous parent)
+            if prev_parent not in parent_node.child_nodes():
+                parent_node.add_child(prev_parent)
+            prev_parent = parent_node
     
-    
-    # Create a list of all leaf nodes
-    leaf_nodes = [node for node in label_to_node.values() if not node.child_nodes()]
-
-    # Loop through generations in reverse order (from leaves to root)
-    for gen in reversed(range(int(root_name.split('_')[0]), max([int(node.label.split('_')[0]) for node in label_to_node.values()]))):
-
-        # Iterate over nodes that are in the current generation
-        for node in [n for n in label_to_node.values() if int(n.label.split('_')[0]) == gen]:
-
-            # Inspect all children of the current node
-            for child in node.child_nodes():
-
-                # If the child is a leaf and it is also a child of any node from a higher generation
-                if not child.child_nodes() and any(child in higher_gen_node.child_nodes() for higher_gen_node in label_to_node.values() if int(higher_gen_node.label.split('_')[0]) > gen):
-                    
-                    # Remove the child from the current node
-                    node.remove_child(child)
-
-    # Connect orphaned leaf nodes to their last associated generation node
-
-    for leaf in leaf_nodes:
-
-        # Find the last generation this leaf node is associated with
-        last_gen_node_label = max([node for node in tree_clusters if leaf.label in tree_clusters[node]], key=lambda x: int(x.split('_')[0]))
-
-        # If the leaf node is not in the tree, add it to the last generation node
-        if leaf not in label_to_node[last_gen_node_label].child_nodes():
-            label_to_node[last_gen_node_label].add_child(leaf)
-
-    # Set the string_rep attribute for each node
-    for label, node in label_to_node.items():
-        node.string_rep = str(label) 
+    # Select the element from label_to_node based on label starting from 0
+    selected_node = None
+    for node_label, node in label_to_node.items():
+        if node_label.split('_')[0] == '0':
+            selected_node = node
+            break
 
     # Create the tree using TreeSwift
     tree = Tree()
-    tree.root = label_to_node[root_name]
-    tree.is_rooted = True
-    
-    return tree
+    tree.root = selected_node
+
+    return tree, label_to_node
 
 
 def assign_edge_lengths(mu, tree):
