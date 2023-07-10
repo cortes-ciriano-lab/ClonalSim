@@ -250,7 +250,7 @@ def clusters_to_nodes(tree_clusters: Dict[Node, Iterable[Node]]) -> Tree:
     tree = Tree()
     tree.root = selected_node
 
-    return tree, label_to_node
+    return tree
 
 
 def assign_edge_lengths(mu, tree):
