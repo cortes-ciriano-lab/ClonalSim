@@ -52,36 +52,70 @@ def process_path(path, subtree):
     return edge_lengths, edges_weights, total_path_value
 
 
-def upd_tree_lengths(obs_tree_obj, left_path, right_path, subtree_obj):
-    # calculate distances on each side and weights
-    re, rw, rt = process_path(path=right_path, subtree=subtree_obj)
-    le, lw, lt = process_path(path=left_path, subtree=subtree_obj)
+# def upd_tree_lengths(obs_tree_obj, left_path, right_path, subtree_obj):
+#     # calculate distances on each side and weights
+#     re, rw, rt = process_path(path=right_path, subtree=subtree_obj)
+#     le, lw, lt = process_path(path=left_path, subtree=subtree_obj)
     
-    # take the average branch length
-    avg_branch_l = (rt + lt) / 2
+#     # take the average branch length
+#     avg_branch_l = (rt + lt) / 2
 
+#     # dictionary to store edge lengths
+#     upd_edge_lengths = {}
+    
+#     print("The right path updated edge lengths are:")
+#     for edge, weight in rw.items():
+#         upd_edge_lengths[edge] = weight * avg_branch_l
+#         print(f"Edge: {edge}, Updated length: {upd_edge_lengths[edge]}")
+
+#     print("The left path updated edge lengths are:")
+#     for edge, weight in lw.items():
+#         upd_edge_lengths[edge] = weight * avg_branch_l
+#         print(f"Edge: {edge}, Updated length: {upd_edge_lengths[edge]}")
+        
+#     # now update the edge lengths on the tree
+#     for node in obs_tree_obj.traverse_postorder():
+#         if node.get_label() in upd_edge_lengths:
+#             val= upd_edge_lengths[node.get_label()]
+#             node.set_edge_length(length=val)
+
+#     print("Final averaged tree")
+    #obs_tree_obj.draw(show_labels=True)
+    #return obs_tree_obj
+
+def upd_tree_lengths(obs_tree_obj, paths, subtree_obj):
     # dictionary to store edge lengths
     upd_edge_lengths = {}
-    
-    print("The right path updated edge lengths are:")
-    for edge, weight in rw.items():
-        upd_edge_lengths[edge] = weight * avg_branch_l
-        print(f"Edge: {edge}, Updated length: {upd_edge_lengths[edge]}")
 
-    print("The left path updated edge lengths are:")
-    for edge, weight in lw.items():
-        upd_edge_lengths[edge] = weight * avg_branch_l
-        print(f"Edge: {edge}, Updated length: {upd_edge_lengths[edge]}")
-        
+    # list to store total path values
+    total_path_values = []
+
+    # calculate distances on each path and weights
+    for path in paths:
+        e, w, t = process_path(path=path, subtree=subtree_obj)
+        total_path_values.append(t)
+
+        print(f"The path {path} updated edge lengths are:")
+        for edge, weight in w.items():
+            if edge not in upd_edge_lengths:
+                upd_edge_lengths[edge] = weight * t
+                print(f"Edge: {edge}, Updated length: {upd_edge_lengths[edge]}")
+
+    # take the average branch length
+    avg_branch_l = sum(total_path_values) / len(total_path_values)
+
+    # normalize the updated edge lengths by the average branch length
+    for edge in upd_edge_lengths:
+        upd_edge_lengths[edge] = avg_branch_l
+
     # now update the edge lengths on the tree
     for node in obs_tree_obj.traverse_postorder():
         if node.get_label() in upd_edge_lengths:
-            val= upd_edge_lengths[node.get_label()]
+            val = upd_edge_lengths[node.get_label()]
             node.set_edge_length(length=val)
 
     print("Final averaged tree")
-    #obs_tree_obj.draw(show_labels=True)
-    #return obs_tree_obj
+
 
 def extract_subtree_paths(subtree):
     paths_to_node_list = []
@@ -114,16 +148,60 @@ def average_subtree(tree_obj, subtree_side):
         if len(child_nodes_v2) < 2:
             print("Warning: Less than two child nodes!")
             continue
-        #print("now printing standard tree")
-        #subtree.draw(show_labels=True)
 
         # take paths_to_node_list, right paths and left paths of subtree
-        paths_to_node_list, right_paths, left_paths = extract_subtree_paths(subtree_small)
-        right_avg_path_sub = paths_to_node_list[0][0] # right path
-        left_avg_path_sub = paths_to_node_list[1][0] # left path   
-        # take an averaged path from the paths_list from each side at random
-        upd_tree_lengths(obs_tree_obj=tree_obj, left_path=left_avg_path_sub, right_path=right_avg_path_sub, subtree_obj=subtree_small) 
+        paths_to_node_list, _, _ = extract_subtree_paths(subtree_small)
 
+        # Flatten the list of paths
+        #all_paths = [path for sublist in paths_to_node_list for path in sublist]
+
+        # Update tree lengths using all paths
+        upd_tree_lengths(obs_tree_obj=tree_obj, paths=paths_to_node_list, subtree_obj=subtree_small)
+
+# def average_subtree(tree_obj, subtree_side):
+#     for n in subtree_side.traverse_postorder(leaves=False):
+#         print("Subtree Calculations...")
+#         print("\n")
+#         print(f"Subtree Node Now: {n}")
+
+#         subtree_small = subtree_side.extract_subtree(n)
+#         child_nodes_v2 = list(subtree_small.root.child_nodes())
+        
+#         if len(child_nodes_v2) < 2:
+#             print("Warning: Less than two child nodes!")
+#             continue
+
+#         # take paths_to_node_list, right paths and left paths of subtree
+#         paths_to_node_list, _, _ = extract_subtree_paths(subtree_small)
+
+#         # Iterate over all pairs of paths and update tree lengths
+#         for i in range(len(paths_to_node_list)):
+#             for j in range(i+1, len(paths_to_node_list)):
+#                 for path_i in paths_to_node_list[i]:
+#                     for path_j in paths_to_node_list[j]:
+#                         upd_tree_lengths(obs_tree_obj=tree_obj, left_path=path_i, right_path=path_j, subtree_obj=subtree_small) 
+
+# def average_subtree(tree_obj, subtree_side):
+#     for n in subtree_side.traverse_postorder(leaves=False):
+#         print("Subtree Calculations...")
+#         print("\n")
+#         print(f"Subtree Node Now: {n}")
+
+#         subtree_small = subtree_side.extract_subtree(n)
+#         child_nodes_v2 = list(subtree_small.root.child_nodes())
+        
+#         if len(child_nodes_v2) < 2:
+#             print("Warning: Less than two child nodes!")
+#             continue
+#         #print("now printing standard tree")
+#         #subtree.draw(show_labels=True)
+
+#         # take paths_to_node_list, right paths and left paths of subtree
+#         paths_to_node_list, right_paths, left_paths = extract_subtree_paths(subtree_small)
+#         right_avg_path_sub = paths_to_node_list[0][0] # right path
+#         left_avg_path_sub = paths_to_node_list[1][0] # left path   
+#         # take an averaged path from the paths_list from each side at random
+#         upd_tree_lengths(obs_tree_obj=tree_obj, left_path=left_avg_path_sub, right_path=right_avg_path_sub, subtree_obj=subtree_small) 
 
 def traverse_and_run_average(tree_obj):
     for n in tree_obj.traverse_postorder(leaves=False):
