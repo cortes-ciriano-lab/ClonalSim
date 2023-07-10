@@ -286,9 +286,9 @@ def traverse_and_run_average(tree_obj):
             
         # take an averaged path from the paths_list from each side at random
         for rpath in right_paths:
-            upd_tree_lengths_two(obs_tree_obj=tree_obj, left_path=left_avg_path, right_path=rpath, subtree_obj=subtree) 
+            upd_tree_lengths(obs_tree_obj=tree_obj, left_path=left_avg_path, right_path=rpath, subtree_obj=subtree) 
         for lpath in left_paths:
-            upd_tree_lengths_two(obs_tree_obj=tree_obj, left_path=lpath, right_path=rpath, subtree_obj=subtree) 
+            upd_tree_lengths(obs_tree_obj=tree_obj, left_path=lpath, right_path=rpath, subtree_obj=subtree) 
             
 
 def transform_data(data):
