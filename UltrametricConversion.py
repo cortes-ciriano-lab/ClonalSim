@@ -95,11 +95,11 @@ def upd_tree_lengths(obs_tree_obj, paths, subtree_obj):
         e, w, t = process_path(path=path, subtree=subtree_obj)
         total_path_values.append(t)
 
-        print(f"The path {path} updated edge lengths are:")
+        print(f"The path {path} edge lengths are:")
         for edge, weight in w.items():
             if edge not in upd_edge_lengths:
                 upd_edge_lengths[edge] = weight * t
-                print(f"Edge: {edge}, Updated length: {upd_edge_lengths[edge]}")
+                print(f"Edge: {edge}, Length: {upd_edge_lengths[edge]}")
 
     # take the average branch length
     avg_branch_l = sum(total_path_values) / len(total_path_values)
@@ -239,56 +239,63 @@ def traverse_and_run_average(tree_obj):
         # take paths_to_node_list, right paths and left paths of subtree
         paths_to_node_list, right_paths, left_paths = extract_subtree_paths(subtree)
 
-        right_totals = []
-        
-        for path in right_paths:
-            _right_lengths, _right_weights, right_total = process_path(path, subtree)
-            right_totals.append(right_total)
-            print(f"Right Total Path Value for path {path}: {right_total}")
+        # Flatten the list of paths
+        all_paths = [path for sublist in paths_to_node_list for path in sublist]
 
-        # Check if all right path totals are equal
-        if len(set(right_totals)) == 1:
-            print("All right paths have equal total path values.")
-            right_avg_path = paths_to_node_list[0][0] # right path
-        else:
-            print("WARNING:! Not all right paths have equal total path values.")
-            print("Averaging subtree...")
-            right_subtree = tree_obj.extract_subtree(right_child)
-            #right_subtree.draw()
-            average_subtree(tree_obj = tree_obj, subtree_side =right_subtree)
-            print("\n")
-            print("Right Subtree averaged...")
-            subtree = tree_obj.extract_subtree(n)
-            paths_to_node_list, right_paths, left_paths = extract_subtree_paths(subtree)
-            right_avg_path = paths_to_node_list[0][0]
+        # Update tree lengths using all paths
+        upd_tree_lengths(obs_tree_obj=tree_obj, paths=all_paths, subtree_obj=subtree)
+
+
+        # right_totals = []
+        
+        # for path in right_paths:
+        #     _right_lengths, _right_weights, right_total = process_path(path, subtree)
+        #     right_totals.append(right_total)
+        #     print(f"Right Total Path Value for path {path}: {right_total}")
+
+        # # Check if all right path totals are equal
+        # if len(set(right_totals)) == 1:
+        #     print("All right paths have equal total path values.")
+        #     right_avg_path = paths_to_node_list[0][0] # right path
+        # else:
+        #     print("WARNING:! Not all right paths have equal total path values.")
+        #     print("Averaging subtree...")
+        #     right_subtree = tree_obj.extract_subtree(right_child)
+        #     #right_subtree.draw()
+        #     average_subtree(tree_obj = tree_obj, subtree_side =right_subtree)
+        #     print("\n")
+        #     print("Right Subtree averaged...")
+        #     subtree = tree_obj.extract_subtree(n)
+        #     paths_to_node_list, right_paths, left_paths = extract_subtree_paths(subtree)
+        #     right_avg_path = paths_to_node_list[0][0]
 
         # Process each left path and check the total path value
-        left_totals = []
-        for path in left_paths:
-            _left_lengths, _left_weights, left_total = process_path(path, subtree)
-            left_totals.append(left_total)
-            print(f"Left Total Path Value for path {path}: {left_total}")
+        # left_totals = []
+        # for path in left_paths:
+        #     _left_lengths, _left_weights, left_total = process_path(path, subtree)
+        #     left_totals.append(left_total)
+        #     print(f"Left Total Path Value for path {path}: {left_total}")
 
-        # Check if all left path totals are equal
-        if len(set(left_totals)) == 1:
-            print("All left paths have equal total path values.")
-            left_avg_path = paths_to_node_list[1][0] # left path
-        else:
-            print("WARNING:! Not all left paths have equal total path values.")
-            print("Averaging subtree...")
-            left_subtree = tree_obj.extract_subtree(left_child)
-            average_subtree(tree_obj, left_subtree)
-            print("\n")
-            print("Left Subtree averaged...")
-            subtree = tree_obj.extract_subtree(n)
-            paths_to_node_list, right_paths, left_paths = extract_subtree_paths(subtree)
-            left_avg_path = paths_to_node_list[1][0]
+        # # Check if all left path totals are equal
+        # if len(set(left_totals)) == 1:
+        #     print("All left paths have equal total path values.")
+        #     left_avg_path = paths_to_node_list[1][0] # left path
+        # else:
+        #     print("WARNING:! Not all left paths have equal total path values.")
+        #     print("Averaging subtree...")
+        #     left_subtree = tree_obj.extract_subtree(left_child)
+        #     average_subtree(tree_obj, left_subtree)
+        #     print("\n")
+        #     print("Left Subtree averaged...")
+        #     subtree = tree_obj.extract_subtree(n)
+        #     paths_to_node_list, right_paths, left_paths = extract_subtree_paths(subtree)
+        #     left_avg_path = paths_to_node_list[1][0]
             
-        # take an averaged path from the paths_list from each side at random
-        for rpath in right_paths:
-            upd_tree_lengths(obs_tree_obj=tree_obj, left_path=left_avg_path, right_path=rpath, subtree_obj=subtree) 
-        for lpath in left_paths:
-            upd_tree_lengths(obs_tree_obj=tree_obj, left_path=lpath, right_path=rpath, subtree_obj=subtree) 
+        # # take an averaged path from the paths_list from each side at random
+        # for rpath in right_paths:
+        #     upd_tree_lengths(obs_tree_obj=tree_obj, left_path=left_avg_path, right_path=rpath, subtree_obj=subtree) 
+        # for lpath in left_paths:
+        #     upd_tree_lengths(obs_tree_obj=tree_obj, left_path=lpath, right_path=rpath, subtree_obj=subtree) 
             
 
 def transform_data(data):
