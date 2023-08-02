@@ -10,6 +10,8 @@ import csv
 from UltrametricConversion import traverse_and_run_average
 from UltrametricConversion import transform_data
 from UltrametricConversion import normalise_data
+from UltrametricConversion import handle_labelless_trees
+from UltrametricConversion import handle_none_edge_trees
 from typing import Dict, Iterable
 
 # create an argparse parser
@@ -275,20 +277,22 @@ def read_observed_data(observed_data_path, output_path, s):
     with open(tree_file) as f:
         tree_str = f.read()
     tree = treeswift.read_tree_newick(tree_str)
-    traverse_and_run_average(tree)
+    handle_labelless_trees(tree)
+    handle_none_edge_trees(tree)
+    normalised_obs_tree = traverse_and_run_average(tree)
     # Calculate lineage through time plot statistics
-    ltt = tree.lineages_through_time(show_plot=True, export_filename=f"{output_path}/Plot_obs_ltt_ultrametric_(s={s}).png")
+    ltt = normalised_obs_tree.lineages_through_time(show_plot=True, export_filename=f"{output_path}/Plot_obs_ltt_ultrametric_(s={s}).png")
     list_of_tuples_obs = [(key, value) for key, value in ltt.items()]
     data_transformed_obs = transform_data(list_of_tuples_obs)
     norm_ltt = normalise_data(data_transformed_obs)
 
     # Save the results in a data structure
     results = {
-        "tree": tree,
-        "ltt": ltt,
+        "tree": normalised_obs_tree,
+        "ltt": norm_ltt,
     }
-    print("Tree:", results["tree"])
-    print("LTT statistics:", results["ltt"])
+    print("Tree:", results["normalised_obs_tree"])
+    print("LTT statistics:", results["norm_ltt"])
     return tree, norm_ltt
 
 
@@ -374,7 +378,9 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     # save simulated tree
     phy_tree_mut.write_tree_newick(f"{output_path}/Simulation_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_output_gen_tree.nwk", hide_rooted_prefix=False)
     # make tree ultrametric
-    traverse_and_run_average(phy_tree_mut)
+    handle_labelless_trees(phy_tree_mut)
+    handle_none_edge_trees(phy_tree_mut)
+    normalised_tree = traverse_and_run_average(phy_tree_mut)
     print("Ultrametric tree done")
     phy_tree_mut.draw(show_plot=True, export_filename=f"{output_path}/Plot_tree_ultrametric_(s={s}).png")
     print("Tree Saved")
@@ -404,7 +410,7 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
 
     print("Reading Observed Data and Calculating LTT...")
     obs_tree , obs_ltt = read_observed_data(observed_d_path, output_path, s)
-    fig_abc , abc = calculate_epsilon(obs_ltt , norm_data)
+    fig_abc , abc, eu_dist = calculate_epsilon(obs_ltt , norm_data)
     if abc < 20:
         fig_abc.savefig(f"{output_path}/Simulation_{N}_{disease}_with_abc_fig_(s={s}).png")
     print("Area Under the Curve calculated")
