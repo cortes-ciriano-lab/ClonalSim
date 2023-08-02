@@ -45,6 +45,7 @@ def traverse_and_run_average(tree_obj):
 
     return tree_obj
 
+
 def transform_data(data):
     data_transformed = []
     
