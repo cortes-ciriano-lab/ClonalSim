@@ -13,6 +13,7 @@ from UltrametricConversion import normalise_data
 from UltrametricConversion import handle_labelless_trees
 from UltrametricConversion import handle_none_edge_trees
 from typing import Dict, Iterable
+import os
 
 # create an argparse parser
 parser = argparse.ArgumentParser(description="Simulate population and tree")
@@ -281,18 +282,12 @@ def read_observed_data(observed_data_path, output_path, s):
     handle_none_edge_trees(tree)
     normalised_obs_tree = traverse_and_run_average(tree)
     # Calculate lineage through time plot statistics
-    ltt = normalised_obs_tree.lineages_through_time(show_plot=True, export_filename=f"{output_path}/Plot_obs_ltt_ultrametric_(s={s}).png")
+    ltt = normalised_obs_tree.lineages_through_time(show_plot=False) #, export_filename=f"{output_path}/Plot_obs_ltt_ultrametric_(s={s}).png")
+    #ltt = normalised_obs_tree.lineages_through_time(show_plot=False, export_filename=f"{output_path}/Plot_obs_ltt_ultrametric_(s={s}).png")
     list_of_tuples_obs = [(key, value) for key, value in ltt.items()]
     data_transformed_obs = transform_data(list_of_tuples_obs)
     norm_ltt = normalise_data(data_transformed_obs)
 
-    # Save the results in a data structure
-    results = {
-        "tree": normalised_obs_tree,
-        "ltt": norm_ltt,
-    }
-    print("Tree:", results["normalised_obs_tree"])
-    print("LTT statistics:", results["norm_ltt"])
     return tree, norm_ltt
 
 
@@ -356,7 +351,7 @@ def calculate_epsilon(norm_data1, norm_data2):
 
 ##### ------------- Wright-Fisher Simulation ------------------------------ ##########
 
-def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, output_path, observed_d_path, num_retries):
+def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, output_path, observed_d_path):
     print("Simulating population...")
     # initiate population
     popul = Population(N, generations, disease, s)
@@ -375,18 +370,20 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     print("Genealogy Done")
     # assign random edge (branch) lengths
     phy_tree_mut = assign_edge_lengths(mu, phy_tree)
-    # save simulated tree
-    phy_tree_mut.write_tree_newick(f"{output_path}/Simulation_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_output_gen_tree.nwk", hide_rooted_prefix=False)
     # make tree ultrametric
     handle_labelless_trees(phy_tree_mut)
     handle_none_edge_trees(phy_tree_mut)
     normalised_tree = traverse_and_run_average(phy_tree_mut)
     print("Ultrametric tree done")
-    phy_tree_mut.draw(show_plot=True, export_filename=f"{output_path}/Plot_tree_ultrametric_(s={s}).png")
+
+    #phy_tree_mut.draw(show_plot=True, export_filename=f"{output_path}/Plot_tree_ultrametric_(s={s}).png")
+
     print("Tree Saved")
     # calculate ltt stats and plot using treeswift
     print("LTT Statistics calculating...")
-    ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=True, export_filename=f"{output_path}/Plot_ltt_ultrametric_(s={s}).png")
+    ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=False)# export_filename=f"{output_path}/Plot_ltt_ultrametric_(s={s}).png")
+
+#    ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=False, export_filename=f"{output_path}/Plot_ltt_ultrametric_(s={s}).png")
     #ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=False)
     # with open(f"{output_path}/Simulation_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_ltt_gen_tree.tsv", "w", newline='') as f:
     #     writer = csv.writer(f, delimiter='\t')
@@ -409,13 +406,13 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     #print("LTT Normalised Saved")
 
     print("Reading Observed Data and Calculating LTT...")
-    obs_tree , obs_ltt = read_observed_data(observed_d_path, output_path, s)
-    fig_abc , abc, eu_dist = calculate_epsilon(obs_ltt , norm_data)
-    if abc < 20:
+    obs_tree, obs_ltt = read_observed_data(observed_d_path, output_path, s)
+    fig_abc, abc = calculate_epsilon(obs_ltt, norm_data)
+    if abc < 0.3:
         fig_abc.savefig(f"{output_path}/Simulation_{N}_{disease}_with_abc_fig_(s={s}).png")
     print("Area Under the Curve calculated")
 
-    return phy_tree_mut , abc
+    return phy_tree_mut, abc
 
 
 # results = []
@@ -434,29 +431,72 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
 # run_simulation_with_restart(sim_number=args.sim_number)
 
 
+max_retries = 1000
+retry_count = 0
+
+while retry_count < max_retries:
+    try:
+        result_tree, abc_epsilon = simulate_population_and_tree(N=args.N, generations=args.generations,
+                                                                disease=args.disease, mut_samples=args.mut_samples,
+                                                                s=args.s, mu=args.mu, output_path=args.output_path,
+                                                                observed_d_path=args.observed_data_path)
+        print(f"abc_epsilon: {abc_epsilon}")  # Debugging line
+
+        # If abc_epsilon is less than 0.5, then create the file, write the header and the results
+        if abc_epsilon < 0.3:
+
+            # save simulated tree
+            result_tree.write_tree_newick(
+                f"{args.output_path}/Simulation_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_output_gen_tree.nwk",
+                hide_rooted_prefix=False)
+
+            file_path = f"{args.output_path}/Simulation_results_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}.tsv"
+            # Check if file already exists (i.e., has been written to in a previous run)
+            header_needed = not os.path.exists(file_path)
+
+            with open(file_path, "a", newline='') as f:
+                if header_needed:
+                    # Write the header with variable names
+                    f.write(
+                        "ABC_Epsilon\tN\tGenerations\tDisease\tMut_Samples\tS\tMu\tOutput_Path\tObserved_Data_Path\n")
+
+                f.write(
+                    f"{abc_epsilon}\t{args.N}\t{args.generations}\t{args.disease}\t{args.mut_samples}\t{args.s}\t{args.mu}\t{args.output_path}\t{args.observed_data_path}\n")
+            break
+        else:
+            raise ValueError("ABC_Epsilon is greater than or equal to 0.5")
+    except (AssertionError, ValueError) as error:
+        print(f"Error occurred: {error}, restarting simulation...")
+        retry_count += 1
 
 
-sim_number = args.sim_number
-num_retries = 0
 
 #Open the file for writing all variables
-with open(f"{args.output_path}/Simulation_results_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}.tsv", "a", newline='') as f:
+# with open(f"{args.output_path}/Simulation_results_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}.tsv", "a", newline='') as f:
+#
+#     # Write the header with variable names
+#     f.write("ABC_Epsilon\tN\tGenerations\tDisease\tMut_Samples\tS\tMu\tOutput_Path\tObserved_Data_Path\n")
+#
+#     max_retries = 10
+#     retry_count = 0
+#
+#     while retry_count < max_retries:
+#         try:
+#             result_tree, abc_epsilon = simulate_population_and_tree(N=args.N, generations=args.generations, disease=args.disease,  mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, observed_d_path=args.observed_data_path)
+#             # Write all variables and args used in the file
+#             f.write(f"{abc_epsilon}\t{args.N}\t{args.generations}\t{args.disease}\t{args.mut_samples}\t{args.s}\t{args.mu}\t{args.output_path}\t{args.observed_data_path}\n")
+#             break
+#         except AssertionError:
+#             print("AssertionError occurred, restarting simulation...")
+#             retry_count += 1
 
-    # Write the header with variable names
-    f.write("ABC_Epsilon\tN\tGenerations\tDisease\tMut_Samples\tS\tMu\tOutput_Path\tObserved_Data_Path\n")
 
-    max_retries = 10
-    retry_count = 0
 
-    while retry_count < max_retries:
-        try:
-            result_tree, abc_epsilon = simulate_population_and_tree(N=args.N, generations=args.generations, disease=args.disease,  mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, observed_d_path=args.observed_data_path, num_retries=num_retries)     
-            # Write all variables and args used in the file
-            f.write(f"{abc_epsilon}\t{args.N}\t{args.generations}\t{args.disease}\t{args.mut_samples}\t{args.s}\t{args.mu}\t{args.output_path}\t{args.observed_data_path}\n")
-            break
-        except AssertionError:
-            print("AssertionError occurred, restarting simulation...")
-            retry_count += 1
+
+
+
+
+
     # while True:
     #     try:
     #         result_tree, abc_epsilon = simulate_population_and_tree(N=args.N, generations=args.generations, disease=args.disease,  mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, observed_d_path=args.observed_data_path, num_retries=num_retries)
