@@ -375,7 +375,7 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     phy_tree = read_tree_newick(tree_string)
     print("Genealogy Done")
     # assign random edge (branch) lengths
-    phy_tree_mut = assign_edge_lengths(mu, phy_tree)
+    phy_tree_mut = assign_edge_lengths(mu, phy_tree, disease)
     # make tree ultrametric
     handle_labelless_trees(phy_tree_mut)
     handle_none_edge_trees(phy_tree_mut)
