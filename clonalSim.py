@@ -256,12 +256,18 @@ def clusters_to_nodes(tree_clusters: Dict[Node, Iterable[Node]]) -> Tree:
     return tree
 
 
-def assign_edge_lengths(mu, tree):
+def assign_edge_lengths(mu, tree, disease_onset):
     """
     Iterate through the tree class and assign edge lengths based on a Poisson distribution with mean rate μ.
     """
+    first_node = True # to identify the root node
+
     for node in tree.traverse_preorder():
-        length = np.random.poisson(mu)
+        if first_node:
+            length = np.random.poisson(mu) * disease_onset
+            first_node = False
+        else:
+            length = np.random.poisson(mu)
         node.set_edge_length(length)
     return tree
 
