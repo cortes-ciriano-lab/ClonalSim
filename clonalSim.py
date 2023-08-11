@@ -414,7 +414,7 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     print("Reading Observed Data and Calculating LTT...")
     obs_tree, obs_ltt = read_observed_data(observed_d_path, output_path, s)
     fig_abc, abc = calculate_epsilon(obs_ltt, norm_data)
-    if abc < 0.3:
+    if abc < 10:
         fig_abc.savefig(f"{output_path}/Simulation_{N}_{disease}_with_abc_fig_(s={s}).png")
     print("Area Under the Curve calculated")
 
@@ -449,7 +449,7 @@ while retry_count < max_retries:
         print(f"abc_epsilon: {abc_epsilon}")  # Debugging line
 
         # If abc_epsilon is less than 0.5, then create the file, write the header and the results
-        if abc_epsilon < 0.3:
+        if abc_epsilon < 10:
 
             # save simulated tree
             result_tree.write_tree_newick(
