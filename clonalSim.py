@@ -69,8 +69,9 @@ class Population:
                 elif gen == self.disease:
                     # first cell with mutation
                     print("Disease started")
-                    population[random.randint(0, self.N - 1)] = 1
-                    self.generation_data.append(population)
+                    new_population = np.copy(population)
+                    new_population[random.randint(0, self.N - 1)] = 1
+                    self.generation_data.append(new_population)
                 elif gen > self.disease:
                     # clonal expansion
                     print("Expansion started")
