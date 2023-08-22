@@ -12,7 +12,7 @@ from UltrametricConversion import transform_data
 from UltrametricConversion import normalise_data
 from UltrametricConversion import handle_labelless_trees
 from UltrametricConversion import handle_none_edge_trees
-from typing import Dict, Iterable
+from typing import Dict, Iterable, List
 import os
 
 # create an argparse parser
@@ -140,86 +140,179 @@ class Population:
         return (self.generation_data, binom_prob_list, mut_n_list, fig)
 
 
-def build_leaf_to_root_connections(tree_mask, mut_samples):
+# def build_leaf_to_root_connections(tree_mask, mut_samples):
+#     '''
+#     Simulate the population using the Wright-Fisher model with selection.
+
+#     Refactors to consider:
+#     - Remove leaf to follow mechanism and just early out when we connect to existing geneology
+#     '''
+#     # List of each generation_ where each generation is a dict from node_idx
+#     gen_to_node_idxs_to_children: List[Dict[str, List[str]]] = []
+#     desired_number = mut_samples
+
+#     # Initialize the list of generations
+#     for generation_idx, generation in enumerate(tree_mask):
+#         gen_to_node_idxs_to_children.append({})
+#         for node_idx, node in enumerate(generation):
+#             if node == 1:
+#                 gen_to_node_idxs_to_children[-1][node_idx] = set()
+
+#     assert desired_number <= len(gen_to_node_idxs_to_children[-1])
+#     gen_to_node_idxs_to_children[-1] = {
+#         id: set()
+#         for id in np.random.choice(
+#             list(gen_to_node_idxs_to_children[-1].keys()),
+#             desired_number,
+#             replace=False
+#         )
+#     }
+
+#     # Go backward from leaf to root_ randomly assigning each leaf to a parent
+#     for leaf_idx in gen_to_node_idxs_to_children[-1].keys(): # this loop iterates over each leaf
+#         leaf_to_follow = None
+#         for generation_idx, generation in reversed( # this inner loop traverses the generations in reverse order excluding the most recent one.
+#                 list(enumerate(gen_to_node_idxs_to_children[:-1]))
+#         ):
+#             if not generation:  # Skip if the generation has no nodes
+#                 print('No mutants yet')
+#                 continue
+#                 # If we already have a leaf to follow pick it's ancestor otherwise pick a random one
+#             if leaf_to_follow is not None:
+#                 parent_idx = next(
+#                     node
+#                     for node, leaves in generation.items()
+#                     if leaf_to_follow in leaves 
+#                 )
+#             else:
+#                 possible_parents = generation.keys()
+#                 possible_parents = [node_idx for node_idx, in possible_parents if len(generation[node_idx]) < 2]
+#                 parent_idx = random.choice(possible_parents)
+
+#             # If the parent already has a leaf_ pick it's ancestor in all previous generations to avoid cycles
+#             if len(gen_to_node_idxs_to_children[generation_idx][parent_idx]) > 0:
+#                 leaf_to_follow = list(gen_to_node_idxs_to_children[generation_idx][parent_idx])[0]
+
+#             # Add the leaf to the parent
+#             gen_to_node_idxs_to_children[generation_idx][parent_idx].add(
+#                 (len(gen_to_node_idxs_to_children) - 1, leaf_idx)
+#             )
+
+#     # Drop any non leaves that weren't connected
+#     # Create a dict from node coordinates to leaf coordinates
+#     leaves_to_nodes = {}  # Dictionary to store the mapping from leaf coordinates to node coordinates
+
+#     for generation_idx, generation in enumerate(gen_to_node_idxs_to_children):
+#         for node_idx, leaves in generation.items():
+#             if generation_idx == len(gen_to_node_idxs_to_children) - 1 or len(leaves) > 0:
+#                 result_key = f"{generation_idx}_{node_idx}"
+#                 for leaf in leaves:
+#                     if str(leaf) in leaves_to_nodes:
+#                         leaves_to_nodes[str(leaf)].append(result_key)
+#                     else:
+#                         leaves_to_nodes[str(leaf)] = [result_key]
+
+
+#     # result = {}
+
+#     # for generation_idx, generation in enumerate(node_to_leaves):
+#     #     for node_idx, leaves in generation.items():
+#     #         if generation_idx == len(node_to_leaves) - 1 or len(leaves) > 0:
+#     #             result_key = f"{generation_idx}_{node_idx}"
+#     #             result_value = {f"{leaf[0]}_{leaf[1]}" for leaf in leaves}
+#     #             #result_value = {f"{str(leaf)}" for leaf in leaves}
+#     #             result[result_key] = result_value
+
+#     return leaves_to_nodes
+
+def build_leaf_to_root_connections(tree_mask: Iterable[Iterable[int]], mut_samples: int):
     '''
     Simulate the population using the Wright-Fisher model with selection.
+    
+    I will take in a tree_mask which is a list of lists, representing a matrix of 0 and 1 per generation(list).
+    1 = mut_sample
+    0 = normal_sample
+
+    Goal of the function is to simulate connections from leaves to root between generations for mut_samples(1s) and 
+    save that in a leaves_to_nodes or equivalent name structure which will be leaves_to_nodes:Dict[str, List[str]].
+
+    Rules for the connection: 1. make sure the last generation has a desired_number of cells at least, if less than that throw Assertion Error
+    2. every parent can have maximum two children, 
+    3. if a generation is empty for mut_samples (1s) just continue to the next and the true ROOT is exactly after the last empty generation
+    4. as you move through the generations to make connections, if a parent already has connections ( a genealogical history) just keep it, do not create a new one.
+
+
+    Refactors to consider:
+    - Remove leaf to follow mechanism and just early out when we connect to existing geneology
     '''
-    # List of each generation_ where each generation is a dict from node_idx to set of leaves
-    node_to_leaves = []
+    # List of each generation_ where each generation is a dict from node_idx
+    # TODO: Generation idx in the tuple isn't necessary
+    gen_to_node_idxs_to_leaves: List[Dict[str, Set[Tuple[int, str]]]] = []
     desired_number = mut_samples
 
     # Initialize the list of generations
     for generation_idx, generation in enumerate(tree_mask):
-        node_to_leaves.append({})
+        gen_to_node_idxs_to_leaves.append({})
         for node_idx, node in enumerate(generation):
             if node == 1:
-                node_to_leaves[-1][node_idx] = set()
+                gen_to_node_idxs_to_leaves[-1][node_idx] = set()
 
-    assert desired_number <= len(node_to_leaves[-1])
-    node_to_leaves[-1] = {
+    assert desired_number <= len(gen_to_node_idxs_to_leaves[-1])
+    gen_to_node_idxs_to_leaves[-1] = {
         id: set()
         for id in np.random.choice(
-            list(node_to_leaves[-1].keys()),
+            list(gen_to_node_idxs_to_leaves[-1].keys()),
             desired_number,
             replace=False
         )
     }
 
     # Go backward from leaf to root_ randomly assigning each leaf to a parent
-    for leaf_idx in node_to_leaves[-1].keys(): # this loop iterates over each leaf
-        leaf_to_follow = None
-        for generation_idx, generation in reversed( # this inner loop traverses the generations in reverse order_ excluding the most recent one.
-                list(enumerate(node_to_leaves[:-1]))
+    for leaf_idx in gen_to_node_idxs_to_leaves[-1].keys(): # this loop iterates over each leaf
+        # leaf_to_follow = None
+        for generation_idx, generation in reversed( # this inner loop traverses the generations in reverse order excluding the most recent one.
+                list(enumerate(gen_to_node_idxs_to_leaves[:-1]))
         ):
             if not generation:  # Skip if the generation has no nodes
-                print('No mutants yet')
+                #print('No mutants yet')
                 continue
-                # If we already have a leaf to follow_ pick it's ancestor_ otherwise pick a random one
+                # If we already have a leaf to follow pick it's ancestor otherwise pick a random one
             if leaf_to_follow is not None:
                 parent_idx = next(
                     node
                     for node, leaves in generation.items()
-                    if leaf_to_follow in leaves
+                    if leaf_to_follow in leaves 
                 )
             else:
-                parent_idx = random.choice(list(generation.keys()))
+                possible_parents = generation.keys()
+                possible_parents = [node_idx for node_idx in possible_parents if len(generation[node_idx]) < 2]
+                if not possible_parents:
+                    print("NO PARENTS")
+                    break
+                parent_idx = random.choice(possible_parents)
 
             # If the parent already has a leaf_ pick it's ancestor in all previous generations to avoid cycles
-            if len(node_to_leaves[generation_idx][parent_idx]) > 0:
-                leaf_to_follow = list(node_to_leaves[generation_idx][parent_idx])[0]
+            if len(gen_to_node_idxs_to_leaves[generation_idx][parent_idx]) > 0:
+                leaf_to_follow = list(gen_to_node_idxs_to_leaves[generation_idx][parent_idx])[0]
 
             # Add the leaf to the parent
-            node_to_leaves[generation_idx][parent_idx].add(
-                (len(node_to_leaves) - 1, leaf_idx)
+            gen_to_node_idxs_to_leaves[generation_idx][parent_idx].add(
+                (len(gen_to_node_idxs_to_leaves) - 1, leaf_idx)
             )
 
     # Drop any non leaves that weren't connected
     # Create a dict from node coordinates to leaf coordinates
-    leaves_to_nodes = {}  # Dictionary to store the mapping from leaf coordinates to node coordinates
+    leaves_to_nodes: Dict[str, List[str]] = {}  # Dictionary to store the mapping from leaf coordinates to node coordinates
 
-    for generation_idx, generation in enumerate(node_to_leaves):
+    for generation_idx, generation in enumerate(gen_to_node_idxs_to_leaves):
         for node_idx, leaves in generation.items():
-            if generation_idx == len(node_to_leaves) - 1 or len(leaves) > 0:
+            if generation_idx == len(gen_to_node_idxs_to_leaves) - 1 or len(leaves) > 0:
                 result_key = f"{generation_idx}_{node_idx}"
                 for leaf in leaves:
                     if str(leaf) in leaves_to_nodes:
                         leaves_to_nodes[str(leaf)].append(result_key)
                     else:
                         leaves_to_nodes[str(leaf)] = [result_key]
-
-
-    # result = {}
-
-    # for generation_idx, generation in enumerate(node_to_leaves):
-    #     for node_idx, leaves in generation.items():
-    #         if generation_idx == len(node_to_leaves) - 1 or len(leaves) > 0:
-    #             result_key = f"{generation_idx}_{node_idx}"
-    #             result_value = {f"{leaf[0]}_{leaf[1]}" for leaf in leaves}
-    #             #result_value = {f"{str(leaf)}" for leaf in leaves}
-    #             result[result_key] = result_value
-
-    return leaves_to_nodes
-
 
 def clusters_to_nodes(tree_clusters: Dict[Node, Iterable[Node]]) -> Tree:
     """
@@ -414,7 +507,7 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     print("Reading Observed Data and Calculating LTT...")
     obs_tree, obs_ltt = read_observed_data(observed_d_path, output_path, s)
     fig_abc, abc = calculate_epsilon(obs_ltt, norm_data)
-    if abc < 10:
+    if abc < 1:
         fig_abc.savefig(f"{output_path}/Simulation_{N}_{disease}_with_abc_fig_(s={s}).png")
     print("Area Under the Curve calculated")
 
@@ -449,14 +542,14 @@ while retry_count < max_retries:
         print(f"abc_epsilon: {abc_epsilon}")  # Debugging line
 
         # If abc_epsilon is less than 0.5, then create the file, write the header and the results
-        if abc_epsilon < 10:
+        if abc_epsilon < 1:
 
             # save simulated tree
             result_tree.write_tree_newick(
-                f"{args.output_path}/Simulation_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_output_gen_tree.nwk",
+                f"{args.output_path}/Simulation_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_{args.mu}_output_gen_tree.nwk",
                 hide_rooted_prefix=False)
 
-            file_path = f"{args.output_path}/Simulation_results_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}.tsv"
+            file_path = f"{args.output_path}/Simulation_results_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_{args.mu}.tsv"
             # Check if file already exists (i.e., has been written to in a previous run)
             header_needed = not os.path.exists(file_path)
 
@@ -470,7 +563,7 @@ while retry_count < max_retries:
                     f"{abc_epsilon}\t{args.N}\t{args.generations}\t{args.disease}\t{args.mut_samples}\t{args.s}\t{args.mu}\t{args.output_path}\t{args.observed_data_path}\n")
             break
         else:
-            raise ValueError("ABC_Epsilon is greater than or equal to 0.5")
+            raise ValueError("ABC_Epsilon is greater than or equal to 1")
     except (AssertionError, ValueError) as error:
         print(f"Error occurred: {error}, restarting simulation...")
         retry_count += 1
