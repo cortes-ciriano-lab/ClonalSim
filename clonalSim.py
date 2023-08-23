@@ -82,6 +82,8 @@ class Population:
                     mut_n_list.append(mut_n)
 
                     cancer_p = (1 + self.s) * mut_n / (self.N + (mut_n * self.s))
+                    if cancer_p > 1:
+                        break
                     binom_prob_list.append(cancer_p)
 
                     offspring = np.random.binomial(n=1, p=cancer_p, size=self.N)
@@ -226,94 +228,96 @@ class Population:
 
 #     return leaves_to_nodes
 
-def build_leaf_to_root_connections(tree_mask: Iterable[Iterable[int]], mut_samples: int):
-    '''
-    Simulate the population using the Wright-Fisher model with selection.
+def build_leaf_to_root_connections(
+    tree_mask: Iterable[Iterable[int]],
+    mut_samples: int,
+) -> Dict[str, List[str]]:
+    """
+    Simulate the population using the Wright-Fisher model with selection. The simulated
+    geneologies allows only two descendants per cell.
+
+    tree_mask: which is a list of lists, representing a matrix where each row is
+    a generation and a value of 1 represents a mutated sample and 0 is a normal sample.
+
+    Returns:
+        A dictionary of num_samples mutated cells to their geneology (path to root)
+        Cells are named with the convention <generation>-<index>
+    """
+    # TODO: WE ASSUME THAT STOCHASTIC EXTINCTION ISN"T POSSIBLE, WE SHOULD EITHER MAKE SURE THAT"S TRUE, OR MAKE THIS ROBUST TO IT (FIX POSSIBLE_CHILDREN = 0) 
     
-    I will take in a tree_mask which is a list of lists, representing a matrix of 0 and 1 per generation(list).
-    1 = mut_sample
-    0 = normal_sample
+    # Assertion that the last generation has a higher number of mut_cells than the desired_number of tips for the sim_tree
+    assert sum(tree_mask[-1]) >= mut_samples
 
-    Goal of the function is to simulate connections from leaves to root between generations for mut_samples(1s) and 
-    save that in a leaves_to_nodes or equivalent name structure which will be leaves_to_nodes:Dict[str, List[str]].
+    max_children = 2
 
-    Rules for the connection: 1. make sure the last generation has a desired_number of cells at least, if less than that throw Assertion Error
-    2. every parent can have maximum two children, 
-    3. if a generation is empty for mut_samples (1s) just continue to the next and the true ROOT is exactly after the last empty generation
-    4. as you move through the generations to make connections, if a parent already has connections ( a genealogical history) just keep it, do not create a new one.
+    # Convert the tree mask into list of generations which are sets of node names
+    generation_to_nodes: List[Set[str]] = [
+        {f"{gen_idx}-{node_idx}" for node_idx, node in enumerate(gen) if node == 1}
+        for gen_idx, gen in enumerate(tree_mask)
+    ]
 
+    # Construct mappings of nodes to their children and parents
+    node_to_children: Dict[str, Set[str]] = {}
+    node_to_parent: Dict[str, str] = {}
+    for generation in generation_to_nodes:
+        for node in generation:
+            node_to_children[node] = set()
+            node_to_parent[node] = None
 
-    Refactors to consider:
-    - Remove leaf to follow mechanism and just early out when we connect to existing geneology
-    '''
-    # List of each generation_ where each generation is a dict from node_idx
-    # TODO: Generation idx in the tuple isn't necessary
-    gen_to_node_idxs_to_leaves: List[Dict[str, Set[Tuple[int, str]]]] = []
-    desired_number = mut_samples
-
-    # Initialize the list of generations
-    for generation_idx, generation in enumerate(tree_mask):
-        gen_to_node_idxs_to_leaves.append({})
-        for node_idx, node in enumerate(generation):
-            if node == 1:
-                gen_to_node_idxs_to_leaves[-1][node_idx] = set()
-
-    assert desired_number <= len(gen_to_node_idxs_to_leaves[-1])
-    gen_to_node_idxs_to_leaves[-1] = {
-        id: set()
-        for id in np.random.choice(
-            list(gen_to_node_idxs_to_leaves[-1].keys()),
-            desired_number,
-            replace=False
-        )
-    }
-
-    # Go backward from leaf to root_ randomly assigning each leaf to a parent
-    for leaf_idx in gen_to_node_idxs_to_leaves[-1].keys(): # this loop iterates over each leaf
-        # leaf_to_follow = None
-        for generation_idx, generation in reversed( # this inner loop traverses the generations in reverse order excluding the most recent one.
-                list(enumerate(gen_to_node_idxs_to_leaves[:-1]))
-        ):
-            if not generation:  # Skip if the generation has no nodes
-                #print('No mutants yet')
-                continue
-                # If we already have a leaf to follow pick it's ancestor otherwise pick a random one
-            if leaf_to_follow is not None:
-                parent_idx = next(
-                    node
-                    for node, leaves in generation.items()
-                    if leaf_to_follow in leaves 
-                )
+    # Find the root node (not necessarily in the first generation if there are empty generations)
+    last_gen = None
+    for generation_idx, generation in reversed(list(enumerate(generation_to_nodes))):
+        if len(generation) == 0:
+            if last_gen is not None:
+                break
             else:
-                possible_parents = generation.keys()
-                possible_parents = [node_idx for node_idx in possible_parents if len(generation[node_idx]) < 2]
-                if not possible_parents:
-                    print("NO PARENTS")
-                    break
-                parent_idx = random.choice(possible_parents)
+                continue                
+        last_gen = generation
+        last_gen_idx = generation_idx
+    assert len(last_gen) == 1
+    root = next(iter(last_gen))
+    root_gen = last_gen_idx
 
-            # If the parent already has a leaf_ pick it's ancestor in all previous generations to avoid cycles
-            if len(gen_to_node_idxs_to_leaves[generation_idx][parent_idx]) > 0:
-                leaf_to_follow = list(gen_to_node_idxs_to_leaves[generation_idx][parent_idx])[0]
+    # Simulate num_samples geneologies from root to a leaf
+    leaves_to_path_to_root: Dict[str, List[str]] = {}
+    while len(leaves_to_path_to_root) < mut_samples:
+        path = [root]
+        for generation in generation_to_nodes[root_gen + 1 :]:
+            node = path[0]
 
-            # Add the leaf to the parent
-            gen_to_node_idxs_to_leaves[generation_idx][parent_idx].add(
-                (len(gen_to_node_idxs_to_leaves) - 1, leaf_idx)
-            )
+            # If the node already has max children, we must choose one of them
+            # Otherwise, choose a node any node which doesn't yet have a parent
+            possible_children = [n for n in generation if node_to_parent[n] is None]
+            if len(node_to_children[node]) == max_children or len(possible_children) == 0:
+                assert len(node_to_children[node]) > 0
+                possible_children = list(node_to_children[node])
+            
+            if len(possible_children) == 0:
+                break
 
-    # Drop any non leaves that weren't connected
-    # Create a dict from node coordinates to leaf coordinates
-    leaves_to_nodes: Dict[str, List[str]] = {}  # Dictionary to store the mapping from leaf coordinates to node coordinates
+            # Filter possible children to ones which don't yet have max children
+            available_children = [
+                n for n in possible_children if len(node_to_children[n]) < max_children
+            ]
+            if len(available_children) > 0:
+                possible_children = available_children
 
-    for generation_idx, generation in enumerate(gen_to_node_idxs_to_leaves):
-        for node_idx, leaves in generation.items():
-            if generation_idx == len(gen_to_node_idxs_to_leaves) - 1 or len(leaves) > 0:
-                result_key = f"{generation_idx}_{node_idx}"
-                for leaf in leaves:
-                    if str(leaf) in leaves_to_nodes:
-                        leaves_to_nodes[str(leaf)].append(result_key)
-                    else:
-                        leaves_to_nodes[str(leaf)] = [result_key]
+            # Choose a random child and add it to the path to the root
+            child = random.choice(possible_children)
+            path.insert(0, child)
+
+        # If the path is unique, connect all parents and children and add the path
+        leaf = path.pop(0)
+        if leaf not in leaves_to_path_to_root:
+            child = leaf
+            for node in path:
+                assert node_to_parent[child] is None or node_to_parent[child] == node
+                node_to_children[node].add(child)
+                node_to_parent[child] = node
+                child = node
+            leaves_to_path_to_root[leaf] = path
+
+    return leaves_to_path_to_root
 
 def clusters_to_nodes(tree_clusters: Dict[Node, Iterable[Node]]) -> Tree:
     """
