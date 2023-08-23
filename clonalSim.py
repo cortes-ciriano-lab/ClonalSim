@@ -331,7 +331,8 @@ def clusters_to_nodes(tree_clusters: Dict[Node, Iterable[Node]]) -> Tree:
     for leaf_label, parent_labels in tree_clusters.items():
         leaf_node = label_to_node[leaf_label]
         prev_parent = leaf_node
-        for parent_label in reversed(parent_labels):
+        #for parent_label in reversed(parent_labels):
+        for parent_label in parent_labels:
             parent_node = label_to_node.get(parent_label)
             if parent_node is None:
                 parent_node = Node(label=parent_label)
