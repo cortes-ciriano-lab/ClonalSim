@@ -25,7 +25,7 @@ parser.add_argument("--disease", type=int, help="number of generations the disea
 parser.add_argument("--mut_samples", type=int, required=False, help="number of mutation samples")
 parser.add_argument("--s", type=float, help="selection coefficient")
 parser.add_argument("--mu", type=float, help="mutation rate")
-# parser.add_argument("--epsilon", type=float, help="Epsilon Threshold")
+parser.add_argument("--epsilon", type=float, help="Epsilon Threshold")
 parser.add_argument("--sim_number", type=float, help="The number of simulations to run internally", default=1, required=False)
 parser.add_argument('--output_path', type=str, default='.', help='output path')
 parser.add_argument('--observed_data_path', type=str, default='.', help='observed_data_path', required=False)
@@ -454,7 +454,7 @@ def calculate_epsilon(norm_data1, norm_data2):
 
 ##### ------------- Wright-Fisher Simulation ------------------------------ ##########
 
-def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, output_path, observed_d_path):
+def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, output_path, observed_d_path, epsilon):
     print("Simulating population...")
     # initiate population
     popul = Population(N, generations, disease, s)
@@ -509,7 +509,7 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     print("Reading Observed Data and Calculating LTT...")
     obs_tree, obs_ltt = read_observed_data(observed_d_path, output_path, s)
     fig_abc, abc = calculate_epsilon(obs_ltt, norm_data)
-    if abc < 0.5:
+    if abc < epsilon:
         fig_abc.savefig(f"{output_path}/Simulation_{N}_{disease}_with_abc_fig_(s={s}).png")
     print("Area Under the Curve calculated")
 
@@ -540,11 +540,11 @@ while retry_count < max_retries:
         result_tree, abc_epsilon = simulate_population_and_tree(N=args.N, generations=args.generations,
                                                                 disease=args.disease, mut_samples=args.mut_samples,
                                                                 s=args.s, mu=args.mu, output_path=args.output_path,
-                                                                observed_d_path=args.observed_data_path)
+                                                                observed_d_path=args.observed_data_path, epsilon=args.epsilon)
         print(f"abc_epsilon: {abc_epsilon}")  # Debugging line
 
         # If abc_epsilon is less than 0.5, then create the file, write the header and the results
-        if abc_epsilon < 0.5:
+        if abc_epsilon < epsilon:
 
             # save simulated tree
             result_tree.write_tree_newick(
