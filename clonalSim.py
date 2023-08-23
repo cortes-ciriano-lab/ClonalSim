@@ -482,9 +482,7 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
 
     #phy_tree_mut.draw(show_plot=True, export_filename=f"{output_path}/Plot_tree_ultrametric_(s={s}).png")
 
-    print("Tree Saved")
     # calculate ltt stats and plot using treeswift
-    print("LTT Statistics calculating...")
     ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=False)# export_filename=f"{output_path}/Plot_ltt_ultrametric_(s={s}).png")
 
 #    ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=False, export_filename=f"{output_path}/Plot_ltt_ultrametric_(s={s}).png")
@@ -494,7 +492,7 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     #     for key, value in ltt_gen_tree.items():
     #         writer.writerow([key, value])
     #print("LTT Saved")
-    
+
     # normalise ltt stats
     list_of_tuples_tree = [(key, value) for key, value in ltt_gen_tree.items()]
     data_transformed = transform_data(list_of_tuples_tree)
@@ -506,13 +504,13 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     #     writer.writerow(["Time", "Lineages"])  # Write column headers
     #     writer.writerows(norm_data)
     print("LTT Statistics Done")
-    
+
     #print("LTT Normalised Saved")
 
     print("Reading Observed Data and Calculating LTT...")
     obs_tree, obs_ltt = read_observed_data(observed_d_path, output_path, s)
     fig_abc, abc = calculate_epsilon(obs_ltt, norm_data)
-    if abc < 1:
+    if abc < 0.5:
         fig_abc.savefig(f"{output_path}/Simulation_{N}_{disease}_with_abc_fig_(s={s}).png")
     print("Area Under the Curve calculated")
 
@@ -535,7 +533,7 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
 # run_simulation_with_restart(sim_number=args.sim_number)
 
 
-max_retries = 1000
+max_retries = 10
 retry_count = 0
 
 while retry_count < max_retries:
@@ -547,14 +545,14 @@ while retry_count < max_retries:
         print(f"abc_epsilon: {abc_epsilon}")  # Debugging line
 
         # If abc_epsilon is less than 0.5, then create the file, write the header and the results
-        if abc_epsilon < 1:
+        if abc_epsilon < 0.5:
 
             # save simulated tree
             result_tree.write_tree_newick(
-                f"{args.output_path}/Simulation_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_{args.mu}_output_gen_tree.nwk",
+                f"{args.output_path}/Simulation_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_output_gen_tree.nwk",
                 hide_rooted_prefix=False)
 
-            file_path = f"{args.output_path}/Simulation_results_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_{args.mu}.tsv"
+            file_path = f"{args.output_path}/Simulation_results_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}.tsv"
             # Check if file already exists (i.e., has been written to in a previous run)
             header_needed = not os.path.exists(file_path)
 
@@ -568,7 +566,7 @@ while retry_count < max_retries:
                     f"{abc_epsilon}\t{args.N}\t{args.generations}\t{args.disease}\t{args.mut_samples}\t{args.s}\t{args.mu}\t{args.output_path}\t{args.observed_data_path}\n")
             break
         else:
-            raise ValueError("ABC_Epsilon is greater than or equal to 1")
+            raise ValueError("ABC_Epsilon is greater than or equal to 0.3")
     except (AssertionError, ValueError) as error:
         print(f"Error occurred: {error}, restarting simulation...")
         retry_count += 1
@@ -604,10 +602,10 @@ while retry_count < max_retries:
     # while True:
     #     try:
     #         result_tree, abc_epsilon = simulate_population_and_tree(N=args.N, generations=args.generations, disease=args.disease,  mut_samples=args.mut_samples, s=args.s, mu=args.mu , output_path=args.output_path, observed_d_path=args.observed_data_path, num_retries=num_retries)
-            
+
     #         # Write all variables and args used in the file
     #         f.write(f"{abc_epsilon}\t{args.N}\t{args.generations}\t{args.disease}\t{args.mut_samples}\t{args.s}\t{args.mu}\t{args.output_path}\t{args.observed_data_path}\n")
-            
+
     #         break
     #     except AssertionError:
     #         print("AssertionError occurred, restarting simulation...")
