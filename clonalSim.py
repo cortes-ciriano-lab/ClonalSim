@@ -549,7 +549,7 @@ while retry_count < max_retries:
         print(f"abc_epsilon: {abc_epsilon}")  # Debugging line
 
         # If abc_epsilon is less than 0.5, then create the file, write the header and the results
-        if abc_epsilon < epsilon:
+        if abc_epsilon < args.epsilon:
 
             # save simulated tree
             result_tree.write_tree_newick(
