@@ -378,7 +378,7 @@ def assign_edge_lengths(mu, tree, disease_onset):
         node.set_edge_length(length)
     return tree
 
-def read_observed_data(observed_data_path, output_path, s):
+def read_observed_data(observed_data_path):
     """
     Read observed tree and calculate LTT statistics and return or read in LTT statistics straight
     """
