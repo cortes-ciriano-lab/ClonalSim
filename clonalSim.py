@@ -60,18 +60,20 @@ class Population:
         for gen in range(1, self.generations + 1):
             print(gen)
             if gen - 1 < len(self.generation_data) and len(self.generation_data) > 0:
-                print("Passed if")
                 if gen < self.disease:
-                    print("Disease hasn't started yet")
                     self.generation_data.append(np.zeros(self.N))
                     mut_n_list.append(0)
                     binom_prob_list.append(0)
                 elif gen == self.disease:
                     # first cell with mutation
+                    population[random.randint(0, self.N - 1)] = 1
+                    self.generation_data.append(population)
+
                     print("Disease started")
                     new_population = np.copy(population)
                     new_population[random.randint(0, self.N - 1)] = 1
                     self.generation_data.append(new_population)
+
                 elif gen > self.disease:
                     # clonal expansion
                     print("Expansion started")
@@ -91,7 +93,7 @@ class Population:
                     num_mutants = [np.count_nonzero(offspring == 1)]
 
                     if num_mutants == 0:
-                        print("Stochastic Extinction")
+                        # print("Stochastic Extinction")
                         self.generation_data.append(offspring)
                         num_mutants = [np.count_nonzero(generation == 1) for generation in self.generation_data]
                         # Plot the number of mutants over time
@@ -322,7 +324,7 @@ def build_leaf_to_root_connections(
 def clusters_to_nodes(tree_clusters: Dict[Node, Iterable[Node]]) -> Tree:
     """
     Input: Dictionary from Leaf nodes to a list of nodes from that leaf to the root
-    Output: Tree Object, all nodes with immediate parent and children 
+    Output: Tree Object, all nodes with immediate parent and children
     """
     label_to_node = {leaf: Node(label=leaf) for leaf in tree_clusters}
 
@@ -339,7 +341,7 @@ def clusters_to_nodes(tree_clusters: Dict[Node, Iterable[Node]]) -> Tree:
             if prev_parent not in parent_node.child_nodes():
                 parent_node.add_child(prev_parent)
             prev_parent = parent_node
-    
+
     # Select the element from label_to_node based on label starting from 0
     selected_node = None
     for node_label, node in label_to_node.items():
@@ -398,7 +400,7 @@ def read_observed_data(observed_data_path, output_path, s):
 from scipy.integrate import trapz
 
 def calculate_epsilon(norm_data1, norm_data2):
-    
+
     curve1 = norm_data1
     curve2 = norm_data2
 
@@ -445,9 +447,6 @@ def calculate_epsilon(norm_data1, norm_data2):
     plt.ylim(0)  # Set the lower limit of y-axis to 0
     # Add the area between curves value to the plot
     plt.text(0.6, 10, f'Area: {area_between_curves}', fontsize=12)
-
-    # Print the result
-    print("The area between the curves is:", area_between_curves)
 
     return fig, area_between_curves
 
