@@ -343,11 +343,11 @@ def clusters_to_nodes(tree_clusters: Dict[Node, Iterable[Node]]) -> Tree:
             prev_parent = parent_node
 
     # Select the element from label_to_node based on label starting from 0
-    selected_node = None
-    for node_label, node in label_to_node.items():
-        if node_label.split('_')[0] == '0':
-            selected_node = node
-            break
+    selected_node_label = None
+    first_leaf, path_for_first_leaf = next(iter(tree_clusters.items()))
+    selected_node_label = path_for_first_leaf[-1]  # this will give you the last node in the path for the first leaf
+    print(f"This the root: {selected_node_label}")
+    selected_node = label_to_node[selected_node_label]
 
     # Create the tree using TreeSwift
     tree = Tree()
@@ -360,17 +360,22 @@ def assign_edge_lengths(mu, tree, disease_onset):
     """
     Iterate through the tree class and assign edge lengths based on a Poisson distribution with mean rate μ.
     """
+
+    one_cell_gens = disease_onset
+
     first_node = True # to identify the root node
 
     for node in tree.traverse_preorder():
         if first_node:
-            length = np.random.poisson(mu) * disease_onset
+            length = np.random.poisson(mu) * one_cell_gens
             first_node = False
+            print(f'The root length is:{length}')
         else:
             length = np.random.poisson(mu)
+            print(node.label)
+            print(f'The node length is:{length}')
         node.set_edge_length(length)
     return tree
-
 
 def read_observed_data(observed_data_path, output_path, s):
     """
