@@ -538,7 +538,7 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
 # run_simulation_with_restart(sim_number=args.sim_number)
 
 
-max_retries = 10
+max_retries = 1000
 retry_count = 0
 
 while retry_count < max_retries:
