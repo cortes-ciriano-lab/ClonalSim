@@ -26,7 +26,6 @@ parser.add_argument("--mut_samples", type=int, required=False, help="number of m
 parser.add_argument("--s", type=float, help="selection coefficient")
 parser.add_argument("--mu", type=float, help="mutation rate")
 parser.add_argument("--epsilon", type=float, help="Epsilon Threshold")
-parser.add_argument("--sim_number", type=float, help="The number of simulations to run internally", default=1, required=False)
 parser.add_argument('--output_path', type=str, default='.', help='output path')
 parser.add_argument('--observed_data_path', type=str, default='.', help='observed_data_path', required=False)
 
@@ -88,7 +87,7 @@ class Population:
                         break
                     binom_prob_list.append(cancer_p)
 
-                    offspring = np.random.binomial(n=1, p=cancer_p, size=self.N)
+                    offspring = np.random.binomial(n=1, p=cancer_p, size=mut_n)
 
                     num_mutants = [np.count_nonzero(offspring == 1)]
 
@@ -250,7 +249,7 @@ def build_leaf_to_root_connections(
     # Assertion that the last generation has a higher number of mut_cells than the desired_number of tips for the sim_tree
     assert sum(tree_mask[-1]) >= mut_samples
 
-    max_children = 2
+    max_children = 20
 
     # Convert the tree mask into list of generations which are sets of node names
     generation_to_nodes: List[Set[str]] = [
