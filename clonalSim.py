@@ -87,7 +87,7 @@ class Population:
                         break
                     binom_prob_list.append(cancer_p)
 
-                    offspring = np.random.binomial(n=1, p=cancer_p, size=mut_n)
+                    offspring = np.random.binomial(n=1, p=cancer_p, size=self.N)
 
                     num_mutants = [np.count_nonzero(offspring == 1)]
 
