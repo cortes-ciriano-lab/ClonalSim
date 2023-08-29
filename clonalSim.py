@@ -87,7 +87,7 @@ class Population:
                         break
                     binom_prob_list.append(cancer_p)
 
-                    offspring = np.random.binomial(n=1, p=cancer_p, size=self.N)
+                    offspring = np.random.binomial(p=cancer_p, size=self.N)
 
                     num_mutants = [np.count_nonzero(offspring == 1)]
 
@@ -228,6 +228,8 @@ class Population:
 #     #             result[result_key] = result_value
 
 #     return leaves_to_nodes
+class StocasticExtinctionException(Exception):
+    ...
 
 def build_leaf_to_root_connections(
     tree_mask: Iterable[Iterable[int]],
@@ -247,7 +249,8 @@ def build_leaf_to_root_connections(
     # TODO: WE ASSUME THAT STOCHASTIC EXTINCTION ISN"T POSSIBLE, WE SHOULD EITHER MAKE SURE THAT"S TRUE, OR MAKE THIS ROBUST TO IT (FIX POSSIBLE_CHILDREN = 0) 
     
     # Assertion that the last generation has a higher number of mut_cells than the desired_number of tips for the sim_tree
-    assert sum(tree_mask[-1]) >= mut_samples
+    if sum(tree_mask[-1]) < mut_samples:
+        raise StocasticExtinctionException
 
     max_children = 20
 
@@ -282,44 +285,45 @@ def build_leaf_to_root_connections(
     # Simulate num_samples geneologies from root to a leaf
     leaves_to_path_to_root: Dict[str, List[str]] = {}
     while len(leaves_to_path_to_root) < mut_samples:
+
         path = [root]
         for generation in generation_to_nodes[root_gen + 1 :]:
             node = path[0]
-
-            # If the node already has max children, we must choose one of them
-            # Otherwise, choose a node any node which doesn't yet have a parent
-            possible_children = [n for n in generation if node_to_parent[n] is None]
-            if len(node_to_children[node]) == max_children or len(possible_children) == 0:
-                assert len(node_to_children[node]) > 0
-                possible_children = list(node_to_children[node])
             
+            # Possible children are nodes without parents, or nodes which 
+            # are already children of the current node
+            possible_children = [n for n in generation if node_to_parent.get(n) in [None, node]]
+
+            # If the node already has the maximum number of children, we 
+            # can't select a new one
+            if len(node_to_children[node]) == max_children:
+                possible_children = list(node_to_children[node])
+
+            # Filter possible children to ones which don't yet have max children
+            possible_children = [
+                n for n in possible_children if len(node_to_children[n]) < max_children
+            ]
+            
+            # If there are no possible children, this geneology was not possible
             if len(possible_children) == 0:
                 break
 
-            # Filter possible children to ones which don't yet have max children
-            available_children = [
-                n for n in possible_children if len(node_to_children[n]) < max_children
-            ]
-            if len(available_children) > 0:
-                possible_children = available_children
-
             # Choose a random child and add it to the path to the root
-            child = random.choice(possible_children)
-            path.insert(0, child)
+            path.insert(0, random.choice(possible_children)) #insert adds child at index 0
 
         # If the path is unique, connect all parents and children and add the path
-        leaf = path.pop(0)
-        if leaf not in leaves_to_path_to_root:
-            child = leaf
-            for node in path:
-                assert node_to_parent[child] is None or node_to_parent[child] == node
-                node_to_children[node].add(child)
-                node_to_parent[child] = node
-                child = node
-            leaves_to_path_to_root[leaf] = path
+        if len(path) == len(generation_to_nodes):
+            leaf = path.pop(0)
+            if leaf not in leaves_to_path_to_root:
+                child = leaf
+                for node in path:
+                    assert node_to_parent.get(child) in [None, node]
+                    node_to_children[node].add(child)
+                    node_to_parent[child] = node
+                    child = node
+                leaves_to_path_to_root[leaf] = path
 
     return leaves_to_path_to_root
-
 def clusters_to_nodes(tree_clusters: Dict[Node, Iterable[Node]]) -> Tree:
     """
     Input: Dictionary from Leaf nodes to a list of nodes from that leaf to the root
