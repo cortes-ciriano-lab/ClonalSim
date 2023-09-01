@@ -1,5 +1,5 @@
 
-# ClonalSim: A Python Wright-Fisher simulator for clonal expansions
+# ClonalSim: A Python simulator for clonal expansions
 
 <img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/ClonalSim.png" width="80%">
 
