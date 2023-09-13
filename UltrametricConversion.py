@@ -61,15 +61,17 @@ def transform_data(data):
     data_transformed.append((int(last_x) + 1, last_y))
     
     return data_transformed
-def normalise_data(data):
-    data_norm = []
+
+# def normalise_data(data):
+#     data_norm = []
     
-    for i in range(len(data)):
-        current_x, current_y = data[i]
+#     for i in range(len(data)):
+#         current_x, current_y = data[i]
         
-        # Normalise the 0th element of the tuple with the last 0th element of the data
-        current_x = current_x / data[-2][0]
+#         # Normalise the 0th element of the tuple with the last 0th element of the data
+#         current_x = current_x / data[-1][0]
+#         current_y = current_y / data[-1][1]
         
-        data_norm.append((current_x, current_y))
+#         data_norm.append((current_x, current_y))
     
-    return data_norm
+#     return data_norm
