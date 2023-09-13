@@ -1,12 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import random
-# import abcpy
 import treeswift
 from treeswift import Tree, Node
 import argparse
 import csv
-# import UltrametricConversion
 from UltrametricConversion import traverse_and_run_average
 from UltrametricConversion import transform_data
 #from UltrametricConversion import normalise_data
@@ -28,7 +26,6 @@ parser.add_argument("--mu", type=float, help="mutation rate")
 parser.add_argument("--epsilon", type=float, help="Epsilon Threshold")
 parser.add_argument('--output_path', type=str, default='.', help='output path')
 parser.add_argument('--observed_data_path', type=str, default='.', help='observed_data_path', required=False)
-
 
 # parse the command-line arguments
 args = parser.parse_args()
@@ -57,7 +54,6 @@ class Population:
         mut_n_list = []
 
         for gen in range(1, self.generations + 1):
-            
             if gen - 1 < len(self.generation_data) and len(self.generation_data) > 0:
                 if gen < self.disease:
                     self.generation_data.append(np.zeros(self.N))
@@ -67,6 +63,11 @@ class Population:
                     new_population = np.copy(population)
                     new_population[random.randint(0, self.N - 1)] = 1
                     self.generation_data.append(new_population)
+                    num_mutants = 1
+                    mut_n_list.append(num_mutants)
+
+                elif gen > self.disease:
+                    # clonal expansion starts
                     num_mutants = 1 
                     mut_n_list.append(num_mutants)
 
@@ -76,6 +77,20 @@ class Population:
                     if cancer_p > 1:
                         break
                     binom_prob_list.append(cancer_p)
+
+                    offspring_l = np.random.binomial(size=1, n=self.N, p=cancer_p)
+                    offspring_n = offspring_l.item()
+                    random_indices = random.sample(range(self.N), k=offspring_n)
+                    offspring = np.zeros(self.N)
+                    offspring[random_indices] = 1
+
+                    num_mutants = np.sum(offspring)
+                    mut_n_list.append(num_mutants)
+
+                    self.generation_data.append(offspring)
+
+
+        return (self.generation_data, binom_prob_list, mut_n_list)
 
                     offspring_l = np.random.binomial( size=1, n=self.N, p=cancer_p)
                     offspring_n = offspring_l.item()
@@ -91,8 +106,8 @@ class Population:
     
 
 def build_leaf_to_root_connections(
-    tree_mask: Iterable[Iterable[int]],
-    mut_samples: int,
+        tree_mask: Iterable[Iterable[int]],
+        mut_samples: int,
 ) -> Dict[str, List[str]]:
     """
     Simulate the population using the Wright-Fisher model with selection. The simulated
@@ -105,7 +120,7 @@ def build_leaf_to_root_connections(
         A dictionary of num_samples mutated cells to their geneology (path to root)
         Cells are named with the convention <generation>-<index>
     """
-    
+
     # Assertion that the last generation has a higher number of mut_cells than the desired_number of tips for the sim_tree
     assert sum(tree_mask[-1]) >= mut_samples
 
@@ -132,7 +147,7 @@ def build_leaf_to_root_connections(
             if last_gen is not None:
                 break
             else:
-                continue                
+                continue
         last_gen = generation
         last_gen_idx = generation_idx
     assert len(last_gen) == 1
@@ -144,14 +159,14 @@ def build_leaf_to_root_connections(
     while len(leaves_to_path_to_root) < mut_samples:
 
         path = [root]
-        for generation in generation_to_nodes[root_gen + 1 :]:
+        for generation in generation_to_nodes[root_gen + 1:]:
             node = path[0]
-            
-            # Possible children are nodes without parents, or nodes which 
+
+            # Possible children are nodes without parents, or nodes which
             # are already children of the current node
             possible_children = [n for n in generation if node_to_parent.get(n) in [None, node]]
 
-            # If the node already has the maximum number of children, we 
+            # If the node already has the maximum number of children, we
             # can't select a new one
             if len(node_to_children[node]) == max_children:
                 possible_children = list(node_to_children[node])
@@ -160,16 +175,16 @@ def build_leaf_to_root_connections(
             possible_children = [
                 n for n in possible_children if len(node_to_children[n]) < max_children
             ]
-            
+
             # If there are no possible children, this geneology was not possible
             if len(possible_children) == 0:
                 break
 
             # Choose a random child and add it to the path to the root
-            path.insert(0, random.choice(possible_children)) #insert adds child at index 0
+            path.insert(0, random.choice(possible_children))  # insert adds child at index 0
 
         # If the path is unique, connect all parents and children and add the path
-        if len(path) == len(generation_to_nodes):
+        if len(path) == len(generation_to_nodes) - root_gen:
             leaf = path.pop(0)
             if leaf not in leaves_to_path_to_root:
                 child = leaf
@@ -193,7 +208,7 @@ def clusters_to_nodes(tree_clusters: Dict[Node, Iterable[Node]]) -> Tree:
     for leaf_label, parent_labels in tree_clusters.items():
         leaf_node = label_to_node[leaf_label]
         prev_parent = leaf_node
-        #for parent_label in reversed(parent_labels):
+        # for parent_label in reversed(parent_labels):
         for parent_label in parent_labels:
             parent_node = label_to_node.get(parent_label)
             if parent_node is None:
@@ -226,7 +241,7 @@ def assign_edge_lengths(mu, tree, disease_onset):
 
     one_cell_gens = disease_onset
 
-    first_node = True # to identify the root node
+    first_node = True  # to identify the root node
 
     for node in tree.traverse_preorder():
         if first_node:
@@ -256,8 +271,9 @@ def read_observed_data(observed_data_path):
     handle_none_edge_trees(tree)
     normalised_obs_tree = traverse_and_run_average(tree)
     # Calculate lineage through time plot statistics
-    ltt = normalised_obs_tree.lineages_through_time(show_plot=False) #, export_filename=f"{output_path}/Plot_obs_ltt_ultrametric_(s={s}).png")
-    #ltt = normalised_obs_tree.lineages_through_time(show_plot=False, export_filename=f"{output_path}/Plot_obs_ltt_ultrametric_(s={s}).png")
+    ltt = normalised_obs_tree.lineages_through_time(
+        show_plot=False)  # , export_filename=f"{output_path}/Plot_obs_ltt_ultrametric_(s={s}).png")
+    # ltt = normalised_obs_tree.lineages_through_time(show_plot=False, export_filename=f"{output_path}/Plot_obs_ltt_ultrametric_(s={s}).png")
     list_of_tuples_obs = [(key, value) for key, value in ltt.items()]
     data_transformed_obs = transform_data(list_of_tuples_obs)
     obs_tree_length = data_transformed_obs[-1][0]
@@ -345,6 +361,26 @@ def euclidean_distance_dicts(dict1, dict2):
     return distance_squared ** 0.5
 
 
+def euclidean_distance_dicts(dict1, dict2):
+    # Reverse the dictionaries
+    reversed_dict1 = {v: k for k, v in dict1.items()}
+    reversed_dict2 = {v: k for k, v in dict2.items()}
+
+    # Ensure that the reversed dictionaries have the same keys
+    if set(reversed_dict1.keys()) != set(reversed_dict2.keys()):
+        raise ValueError("The dictionaries have different values.")
+
+    # Combine keys from both dictionaries
+    all_keys = set(dict1.keys()) | set(dict2.keys())
+
+    distance_squared = 0
+    for key in all_keys:
+        value1 = dict1.get(key, 0)
+        value2 = dict2.get(key, 0)
+        distance_squared += (value2 - value1) ** 2
+
+    return distance_squared ** 0.5
+
 
 ##### ------------- Wright-Fisher Simulation ------------------------------ ##########
 
@@ -353,8 +389,8 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     # initiate population
     popul = Population(N, generations, disease, s)
     # go from population array to tree_clusters dictionary
-    gen, prob, mut, fig = popul.simulate_population()
-    #fig.savefig(f"{output_path}/Simulation_{num_retries}_with_mutants_in_time_(s={s}).png")
+    gen, prob, mut = popul.simulate_population()
+    # fig.savefig(f"{output_path}/Simulation_{num_retries}_with_mutants_in_time_(s={s}).png")
     print("Population Done...")
     # create genealogy and save in tree_clusters
     print("Simulating Genealogy...")
@@ -373,6 +409,10 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     handle_none_edge_trees(phy_tree_mut)
     normalised_tree = traverse_and_run_average(phy_tree_mut)
     print("Ultrametric tree done")
+
+    # calculate ltt stats and plot using treeswift
+    ltt_gen_tree = normalised_tree.lineages_through_time(
+        show_plot=False)  # export_filename=f"{output_path}/Plot_ltt_ultrametric_(s={s}).png")
     #phy_tree_mut.draw(show_plot=True, export_filename=f"{output_path}/Plot_tree_ultrametric_(s={s}).png")
 
     # calculate ltt stats and plot using treeswift
@@ -382,6 +422,10 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     data_transformed = transform_data(list_of_tuples_tree)
     #norm_data = normalise_data(data_transformed)
     print("LTT Statistics Done")
+
+    print("Reading Observed Data and Calculating LTT...")
+    obs_tree, obs_ltt, obs_tree_length = read_observed_data(observed_d_path)
+    fig_abc, abc = calculate_epsilon(obs_ltt, data_transformed, mut_samples, obs_tree_length)
     
     print("Reading Observed Data and Calculating LTT...")
     obs_tree, obs_ltt, obs_tree_length = read_observed_data(observed_d_path)
@@ -395,6 +439,7 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     return phy_tree_mut, abc
 
 
+
 max_retries = 1000
 retry_count = 0
 
@@ -403,10 +448,11 @@ while retry_count < max_retries:
         result_tree, abc_epsilon = simulate_population_and_tree(N=args.N, generations=args.generations,
                                                                 disease=args.disease, mut_samples=args.mut_samples,
                                                                 s=args.s, mu=args.mu, output_path=args.output_path,
-                                                                observed_d_path=args.observed_data_path, epsilon=args.epsilon)
+                                                                observed_d_path=args.observed_data_path,
+                                                                epsilon=args.epsilon)
         print(f"abc_epsilon: {abc_epsilon}")  # Debugging line
 
-        # If abc_epsilon is less than 0.5, then create the file, write the header and the results
+        # If abc_epsilon is less than a value, then create the file, write the header and the results
         if abc_epsilon < args.epsilon:
 
             # save simulated tree
@@ -428,8 +474,7 @@ while retry_count < max_retries:
                     f"{abc_epsilon}\t{args.N}\t{args.generations}\t{args.disease}\t{args.mut_samples}\t{args.s}\t{args.mu}\t{args.output_path}\t{args.observed_data_path}\n")
             break
         else:
-            raise ValueError("ABC_Epsilon is greater than or equal to 0.3")
+            raise ValueError("ABC_Epsilon is greater than or equal to given epsilon")
     except (AssertionError, ValueError) as error:
         print(f"Error occurred: {error}, restarting simulation...")
         retry_count += 1
-        
