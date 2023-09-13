@@ -92,18 +92,6 @@ class Population:
 
         return (self.generation_data, binom_prob_list, mut_n_list)
 
-                    offspring_l = np.random.binomial( size=1, n=self.N, p=cancer_p)
-                    offspring_n = offspring_l.item()
-                    random_indices = random.sample(range(self.N), k=offspring_n)
-                    offspring = np.zeros(self.N) 
-                    offspring[random_indices] = 1
-            
-                    num_mutants = np.sum(offspring)
-                    mut_n_list.append(num_mutants)
-                    self.generation_data.append(offspring)
-
-        return (self.generation_data, binom_prob_list, mut_n_list)
-    
 
 def build_leaf_to_root_connections(
         tree_mask: Iterable[Iterable[int]],
@@ -285,7 +273,7 @@ def read_observed_data(observed_data_path):
 from scipy.integrate import trapz
 
 def calculate_epsilon(norm_data1, norm_data2, mut_samples, obs_tree_length):
-    
+
     curve1 = norm_data1
     curve2 = norm_data2
 
@@ -431,7 +419,7 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     obs_tree, obs_ltt, obs_tree_length = read_observed_data(observed_d_path)
 
     fig_abc, abc = calculate_epsilon(obs_ltt, data_transformed, mut_samples, obs_tree_length)
-    
+
     if abc is not None and epsilon is not None and abc < epsilon:
         fig_abc.savefig(f"{output_path}/Simulation_{N}_{disease}_with_abc_fig_(s={s}).png")
     print("Area Under the Curve calculated")
