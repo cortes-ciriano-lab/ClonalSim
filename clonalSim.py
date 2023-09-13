@@ -393,11 +393,6 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
     print("Ultrametric tree done")
 
     # calculate ltt stats and plot using treeswift
-    ltt_gen_tree = normalised_tree.lineages_through_time(
-        show_plot=False)  # export_filename=f"{output_path}/Plot_ltt_ultrametric_(s={s}).png")
-    #phy_tree_mut.draw(show_plot=True, export_filename=f"{output_path}/Plot_tree_ultrametric_(s={s}).png")
-
-    # calculate ltt stats and plot using treeswift
     ltt_gen_tree = phy_tree_mut.lineages_through_time(show_plot=False)# export_filename=f"{output_path}/Plot_ltt_ultrametric_(s={s}).png")
     # normalise ltt stats
     list_of_tuples_tree = [(key, value) for key, value in ltt_gen_tree.items()]
@@ -418,7 +413,9 @@ def simulate_population_and_tree(N, generations, disease, mut_samples, s, mu, ou
         fig_abc.savefig(f"{output_path}/Simulation_{N}_{disease}_with_abc_fig_(s={s}).png")
     print("Area Under the Curve calculated")
 
-    return phy_tree_mut, abc
+    eud = euclidean_distance_dicts(obs_ltt, ltt_gen_tree)
+
+    return phy_tree_mut, abc, eud
 
 
 
@@ -427,7 +424,7 @@ retry_count = 0
 
 while retry_count < max_retries:
     try:
-        result_tree, abc_epsilon = simulate_population_and_tree(N=args.N, generations=args.generations,
+        result_tree, abc_epsilon, eud = simulate_population_and_tree(N=args.N, generations=args.generations,
                                                                 disease=args.disease, mut_samples=args.mut_samples,
                                                                 s=args.s, mu=args.mu, output_path=args.output_path,
                                                                 observed_d_path=args.observed_data_path,
@@ -450,10 +447,10 @@ while retry_count < max_retries:
                 if header_needed:
                     # Write the header with variable names
                     f.write(
-                        "ABC_Epsilon\tN\tGenerations\tDisease\tMut_Samples\tS\tMu\tOutput_Path\tObserved_Data_Path\n")
+                        "ABC_Epsilon\tEUD\tN\tGenerations\tDisease\tMut_Samples\tS\tMu\tOutput_Path\tObserved_Data_Path\n")
 
                 f.write(
-                    f"{abc_epsilon}\t{args.N}\t{args.generations}\t{args.disease}\t{args.mut_samples}\t{args.s}\t{args.mu}\t{args.output_path}\t{args.observed_data_path}\n")
+                    f"{abc_epsilon}\t{eud}\t{args.N}\t{args.generations}\t{args.disease}\t{args.mut_samples}\t{args.s}\t{args.mu}\t{args.output_path}\t{args.observed_data_path}\n")
             break
         else:
             raise ValueError("ABC_Epsilon is greater than or equal to given epsilon")
