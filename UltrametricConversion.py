@@ -54,13 +54,15 @@ def transform_data(data):
         next_x, _ = data[i+1]
         
         for x in range(int(current_x), int(next_x)):
-            data_transformed.append((x, current_y))
+            data_transformed.append((float(x), current_y))
+    
     last_x, last_y = data[-1]
     # Assuming that we need to add one more point after the last x based on the example provided
-    data_transformed.append((int(last_x), last_y))
-    data_transformed.append((int(last_x) + 1, last_y))
+    data_transformed.append((float(last_x), last_y))
+    data_transformed.append((float(last_x) + 1, last_y))
     
     return data_transformed
+
 
 # def normalise_data(data):
 #     data_norm = []
