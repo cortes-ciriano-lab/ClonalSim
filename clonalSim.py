@@ -51,57 +51,61 @@ class Population:
         """
 
         # Initialize the first population
-        population = np.zeros(self.N, dtype=int)
+        population = np.zeros(self.N)
         self.generation_data.append(population)
         binom_prob_list = []
         mut_n_list = []
 
         for gen in range(1, self.generations + 1):
-            print(gen)
+            #print(f"Generation: {gen}")
             if gen - 1 < len(self.generation_data) and len(self.generation_data) > 0:
                 if gen < self.disease:
                     self.generation_data.append(np.zeros(self.N))
                     mut_n_list.append(0)
                     binom_prob_list.append(0)
                 elif gen == self.disease:
-                    # first cell with mutation
-                    population[random.randint(0, self.N - 1)] = 1
-                    self.generation_data.append(population)
-
-                    print("Disease started")
+                    #print("Disease started")
                     new_population = np.copy(population)
                     new_population[random.randint(0, self.N - 1)] = 1
                     self.generation_data.append(new_population)
+                    num_mutants = 1 
+                    mut_n_list.append(num_mutants)
 
                 elif gen > self.disease:
                     # clonal expansion
-                    print("Expansion started")
-                    print(f"Length self.gen.data: {len(self.generation_data)}")
-                    print(self.generation_data[gen - 1])
-                    mut_n = len(np.where(self.generation_data[gen - 1] == 1)[0])
-                    print(mut_n)
-                    mut_n_list.append(mut_n)
-
-                    cancer_p = (1 + self.s) * mut_n / (self.N + (mut_n * self.s))
+                    #print("Expansion started")
+                    #print(f"Length self.gen.data: {len(self.generation_data)}")
+                    #print(self.generation_data[gen - 1])
+                    mut_n = mut_n_list[-1]
+                    #print(f"N of mutants in last gen: {mut_n}")
+                    #mut_n = len(np.where(self.generation_data[gen - 1] == 1)[0])
+                    cancer_p = ((1 + self.s) * mut_n) / (self.N + (mut_n * self.s))
                     if cancer_p > 1:
                         break
                     binom_prob_list.append(cancer_p)
 
-                    offspring = np.random.binomial(p=cancer_p, size=self.N)
+                    offspring_l = np.random.binomial( size=1, n=self.N, p=cancer_p)
+                    offspring_n = offspring_l.item()
+                    #print(f"Offspring number: {offspring_n}")
+                    random_indices = random.sample(range(self.N), k=offspring_n)
+                    offspring = np.zeros(self.N)  # Renamed array variable
+                    offspring[random_indices] = 1
+            
+                    num_mutants = np.sum(offspring)
+                    #print(f"N of mutants in offspring: {num_mutants}")
+                    mut_n_list.append(num_mutants)
 
-                    num_mutants = [np.count_nonzero(offspring == 1)]
-
-                    if num_mutants == 0:
-                        # print("Stochastic Extinction")
-                        self.generation_data.append(offspring)
-                        num_mutants = [np.count_nonzero(generation == 1) for generation in self.generation_data]
-                        # Plot the number of mutants over time
-                        fig, ax = plt.subplots()
-                        ax.plot(range(len(num_mutants)), np.log(num_mutants))
-                        ax.set_xlabel("Time in Generations")
-                        ax.set_ylabel("Number of mutants ln(N)")
-                        ax.set_title(f"Mutant allele frequency over time (s={self.s})")
-                        return (self.generation_data, binom_prob_list, mut_n_list, fig)
+                    # if num_mutants == 0:
+                    #     #print("Stochastic Extinction")
+                    #     self.generation_data.append(offspring)
+                    #     num_mutants = [np.count_nonzero(generation == 1) for generation in self.generation_data]
+                    #     # Plot the number of mutants over time
+                    #     fig, ax = plt.subplots()
+                    #     ax.plot(range(len(num_mutants)), np.log(num_mutants))
+                    #     ax.set_xlabel("Time in Generations")
+                    #     ax.set_ylabel("Number of mutants ln(N)")
+                    #     ax.set_title(f"Mutant allele frequency over time (s={self.s})")
+                    #     return (self.generation_data, binom_prob_list, mut_n_list, fig)
 
                     self.generation_data.append(offspring)
 
@@ -132,16 +136,20 @@ class Population:
 
         # Plot the number of mutants over time
         # Count the number of individuals with a value of 1 in each generation
-        num_mutants = [np.count_nonzero(generation == 1) for generation in self.generation_data]
+        # num_mutants = [
+        #     np.sum(generation) 
+        #     for generation in self.generation_data 
+        #     if np.sum(generation) > 0
+        # ]
 
         # Plot the number of mutants over time
-        fig, ax = plt.subplots()
-        ax.plot(range(len(num_mutants)), np.log(num_mutants))
-        ax.set_xlabel("Time in Generations")
-        ax.set_ylabel("Number of mutants ln(N)")
-        ax.set_title(f"Mutant allele frequency over time (s={self.s})")
+        # fig, ax = plt.subplots()
+        # ax.plot(range(len(num_mutants)), np.log(num_mutants))
+        # ax.set_xlabel("Time in Generations")
+        # ax.set_ylabel("Number of mutants ln(N)")
+        # ax.set_title(f"Mutant allele frequency over time (s={self.s})")
 
-        return (self.generation_data, binom_prob_list, mut_n_list, fig)
+        return (self.generation_data, binom_prob_list, mut_n_list)
 
 
 # def build_leaf_to_root_connections(tree_mask, mut_samples):
@@ -409,7 +417,7 @@ def read_observed_data(observed_data_path):
 from scipy.integrate import trapz
 
 def calculate_epsilon(norm_data1, norm_data2):
-
+    
     curve1 = norm_data1
     curve2 = norm_data2
 
@@ -444,8 +452,8 @@ def calculate_epsilon(norm_data1, norm_data2):
 
     # Plotting
     fig = plt.figure(figsize=(10, 6))
-    plt.plot(x_curve1, y_curve1, label='MPN tree')
-    plt.plot(x_curve2, y_curve2, label='Simulation')
+    plt.plot(x_curve1, y_curve1, label='MPN tree 1')
+    plt.plot(x_curve2, y_curve2, label='MPN tree 1')
     plt.fill_between(fill_x, fill_y1, fill_y2, where=np.array(fill_y1) >= np.array(fill_y2), color='blue', alpha=0.3)
     plt.fill_between(fill_x, fill_y1, fill_y2, where=np.array(fill_y1) < np.array(fill_y2), color='red', alpha=0.3)
     plt.xlabel('Scaled Time')
@@ -455,9 +463,33 @@ def calculate_epsilon(norm_data1, norm_data2):
     plt.grid(True)
     plt.ylim(0)  # Set the lower limit of y-axis to 0
     # Add the area between curves value to the plot
-    plt.text(0.6, 10, f'Area: {area_between_curves}', fontsize=12)
+    plt.text(0, 0, f'Area: {area_between_curves}', fontsize=12)
+
+    # Print the result
+    print("The area between the curves is:", area_between_curves)
 
     return fig, area_between_curves
+
+def euclidean_distance_dicts(dict1, dict2):
+
+    # Reverse the dictionaries
+    reversed_dict1 = {v: k for k, v in dict1.items()}
+    reversed_dict2 = {v: k for k, v in dict2.items()}
+
+    # Ensure that the reversed dictionaries have the same keys
+    if set(reversed_dict1.keys()) != set(reversed_dict2.keys()):
+        raise ValueError("The dictionaries have different values.")
+    
+    # Combine keys from both dictionaries
+    all_keys = set(dict1.keys()) | set(dict2.keys())
+
+    distance_squared = 0
+    for key in all_keys:
+        value1 = dict1.get(key, 0)
+        value2 = dict2.get(key, 0)
+        distance_squared += (value2 - value1) ** 2
+
+    return distance_squared ** 0.5
 
 
 
