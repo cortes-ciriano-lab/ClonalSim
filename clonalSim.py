@@ -65,12 +65,6 @@ class Population:
                     self.generation_data.append(new_population)
                     num_mutants = 1
                     mut_n_list.append(num_mutants)
-
-                elif gen > self.disease:
-                    # clonal expansion starts
-                    num_mutants = 1 
-                    mut_n_list.append(num_mutants)
-
                 elif gen > self.disease:
                     mut_n = mut_n_list[-1]
                     cancer_p = ((1 + self.s) * mut_n) / (self.N + (mut_n * self.s))
