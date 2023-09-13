@@ -261,7 +261,7 @@ def read_observed_data(observed_data_path):
     obs_tree_length = data_transformed_obs[-1][0]
     #norm_ltt = normalise_data(data_transformed_obs)
 
-    return tree, data_transformed_obs, obs_tree_length
+    return tree, ltt, obs_tree_length
 
 
 from scipy.integrate import trapz
