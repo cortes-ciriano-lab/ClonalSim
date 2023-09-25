@@ -57,23 +57,23 @@ def transform_data(data):
             data_transformed.append((float(x), current_y))
     
     last_x, last_y = data[-1]
+    last_x2, last_y2 = data[-2]
     # Assuming that we need to add one more point after the last x based on the example provided
-    data_transformed.append((float(last_x), last_y))
-    data_transformed.append((float(last_x) + 1, last_y))
+    data_transformed.append((float(last_x), last_y2))
     
     return data_transformed
 
 
-# def normalise_data(data):
-#     data_norm = []
+def normalise_data(data):
+    data_norm = []
     
-#     for i in range(len(data)):
-#         current_x, current_y = data[i]
+    for i in range(len(data)):
+        current_x, current_y = data[i]
         
-#         # Normalise the 0th element of the tuple with the last 0th element of the data
-#         current_x = current_x / data[-1][0]
-#         current_y = current_y / data[-1][1]
+        # Normalise the 0th element of the tuple with the last 0th element of the data
+        current_x = current_x / data[-1][0]
+        current_y = current_y / data[-1][1]
         
-#         data_norm.append((current_x, current_y))
+        data_norm.append((current_x, current_y))
     
-#     return data_norm
+    return data_norm
