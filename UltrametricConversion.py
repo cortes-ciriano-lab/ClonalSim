@@ -57,9 +57,9 @@ def transform_data(data):
             data_transformed.append((float(x), current_y))
     
     last_x, last_y = data[-1]
-    last_x2, last_y2 = data[-2]
+    max_last_y = max(item[1] for item in data)  # Extract the max value of the second elements
     # Assuming that we need to add one more point after the last x based on the example provided
-    data_transformed.append((float(last_x), last_y2))
+    data_transformed.append((float(last_x), max_last_y))
     
     return data_transformed
 
