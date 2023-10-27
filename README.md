@@ -59,19 +59,10 @@ obs_tree.ltt()
 ## Example Observed Data Tree from MPN patient Van Egeren, D. et al. (2021) ‘Reconstructing the Lineage Histories and Differentiation Trajectories of Individual Cancer Cells in Myeloproliferative Neoplasms’, Cell stem cell
 <img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/ET2.png" alt="Patient with ET" width="80%">
 
-## Example Results of the Wright-Fisher model simulation
 
-#### Example Results with high fitness
-<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_s_1.4.png" alt="Results tree with s=1.8" width="80%">
-<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_ltt_1.4.png" alt="Results tree with s=1.8" width="80%">
-<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_tree_1.4.png" alt="Results tree with s=1.8" width="80%">
+## Approximate Bayesian Computation Using ClonalSim
 
-
-#### Example Results with low fitness
-<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_s_0.3.png" alt="Results tree with s=0.5" width="80%">
-<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_ltt_0.3.png" alt="Results tree with s=0.5" width="80%">
-<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/output_tree_0.3.png" alt="Results tree with s=0.5" width="80%">
-
+<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/clonalsim_framew.png" alt="ClonalSim ABC Framework" width="80%">
 
 
 ## Authors
