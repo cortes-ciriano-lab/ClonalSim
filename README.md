@@ -7,6 +7,8 @@ ClonalSim is an object-oriented program that effectively simulates a Wright-Fish
 
 Moreover ClonalSim can turn an array or matrix straight a python Tree object with nodes. Then, the user can use the class which is compatible with the treeswift python package for downstream analysis such as visualisation, editing etc.
 
+# NOTE: Currently ClonalSim is under-development for other user usage and its used for research only by the Cortes-Ciriano lab. An upgrade is coming soon with add ons.
+
 ## Functionalities
 Main functionalities include:
 1. Population class with features and a method inside to simulate Wright-Fisher
