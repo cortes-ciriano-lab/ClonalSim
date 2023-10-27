@@ -478,6 +478,8 @@ def simulate_population_and_tree_MSI(N, generations, disease, mut_samples, s, mu
 max_retries = 1000
 retry_count = 0
 
+import time
+
 while retry_count < max_retries:
     if args.model_type == "MSI":
         try:
@@ -493,10 +495,10 @@ while retry_count < max_retries:
 
                 # save simulated tree
                 result_tree.write_tree_newick(
-                    f"{args.output_path}/Simulation_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_output_gen_tree.nwk",
+                    f"{args.output_path}/Simulation_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_output_gen_tree_ID{int(time.time())}.nwk",
                     hide_rooted_prefix=False)
 
-                file_path = f"{args.output_path}/Simulation_results_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}.tsv"
+                file_path = f"{args.output_path}/Simulation_results_{args.N}_{args.generations}_{args.disease}_{args.mut_samples}_{args.s}_ID{int(time.time())}.tsv"
                 # Check if file already exists (i.e., has been written to in a previous run)
                 header_needed = not os.path.exists(file_path)
 
