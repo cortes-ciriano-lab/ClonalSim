@@ -62,7 +62,7 @@ obs_tree.ltt()
 
 ## Approximate Bayesian Computation Using ClonalSim
 
-<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/clonalsim_framew.png" alt="ClonalSim ABC Framework" width="80%">
+<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/clonalsim_framew.png" alt="ClonalSim ABC Framework" width="80%">
 
 
 ## Authors
