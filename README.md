@@ -66,7 +66,7 @@ obs_tree.ltt()
 ## Example Observed Data Tree from MPN patient Van Egeren, D. et al. (2021) ‘Reconstructing the Lineage Histories and Differentiation Trajectories of Individual Cancer Cells in Myeloproliferative Neoplasms’, Cell stem cell
 <img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/et1tree.png" alt="Patient with ET" width="40%">
 
-<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/ET1LTT.png" alt="Patient with ET" width="40%">
+<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/ET1LTT.png" alt="Patient with ET" width="50%">
 
 
 ### Best Simulated Tree
@@ -74,7 +74,7 @@ obs_tree.ltt()
 <img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/ET1bestsim.png" alt="Patient with ET" width="40%">
 
 
-<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/ET1bestsimltt.png" alt="Patient with ET" width="40%">
+<img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/ET1bestsimltt.png" alt="Patient with ET" width="50%">
 
 
 ## Approximate Bayesian Computation Using ClonalSim
