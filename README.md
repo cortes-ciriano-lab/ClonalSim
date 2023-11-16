@@ -3,11 +3,11 @@
 
 <img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/ClonalSim.png" width="80%">
 
-ClonalSim is an object-oriented program that effectively simulates a Wright-Fisher model with selection. Specifically, it is used to calculate a clonal expansion where the number of mutant cells in each generation are drawn with binomial sampling. This code is being developed as part of the MSI evolution project.
+ClonalSim is an object-oriented program that effectively simulates a Wright-Fisher model with selection. Specifically, it is used to calculate a clonal expansion where the number of mutant cells in each generation are drawn with binomial sampling. It also allows for switch of mutational rates, to make it appropriate for MMRD(Mismatch Repair Deficient) hypermutated samples. This code is being developed as part of the MSI evolution project.
 
 Moreover ClonalSim can turn an array or matrix straight a python Tree object with nodes. Then, the user can use the class which is compatible with the treeswift python package for downstream analysis such as visualisation, editing etc.
 
-# NOTE: Currently ClonalSim is under-development for other user usage and its used for research only by the Cortes-Ciriano lab. An upgrade is coming soon with add ons.
+### NOTE: Currently ClonalSim is under-development for other user usage and its used for research only by the Cortes-Ciriano lab. An upgrade is coming soon with add ons.
 
 ## Functionalities
 Main functionalities include:
@@ -15,7 +15,7 @@ Main functionalities include:
 2. Transfer of an array population to a tree network with nodes, ready to import to the python treeswift package and versatile for further analysis.
 3. Read in function for observed data from a tsv file or string.
 4. Function to assign branch lengths based on a Poisson distribution with mean of a given mutation rate 
-5.  Function to do averaging across the branch lengths of the tree before summary statistics
+5.  Function to do averaging across the branch lengths of the tree before summary statistics (ultrametric tree transformation)
 
 ## Description of the code
 #### Master Simulator Function that includes running the following:
