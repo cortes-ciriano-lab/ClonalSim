@@ -3,11 +3,12 @@
 
 <img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/ClonalSim.png" width="80%">
 
-ClonalSim is an object-oriented program that effectively simulates a Wright-Fisher model with selection. Specifically, it is used to calculate a clonal expansion where the number of mutant cells in each generation are drawn with binomial sampling. This code is being developed as part of the MSI evolution project.
+ClonalSim is an object-oriented program that effectively simulates a Wright-Fisher model with selection. It also includes a model for alternating mutational rates in the trunk of the tree, to be suitable for MSI samples. This code is being developed as part of the MSI evolution project.
 
 Moreover ClonalSim can turn an array or matrix straight a python Tree object with nodes. Then, the user can use the class which is compatible with the treeswift python package for downstream analysis such as visualisation, editing etc.
 
-# NOTE: Currently ClonalSim is under-development for other user usage and its used for research only by the Cortes-Ciriano lab. An upgrade is coming soon with add ons.
+
+### NOTE: Currently ClonalSim is under-development for other user usage and its used for research only by the Cortes-Ciriano lab. An upgrade is coming soon with add ons.
 
 ## Functionalities
 Main functionalities include:
@@ -15,7 +16,7 @@ Main functionalities include:
 2. Transfer of an array population to a tree network with nodes, ready to import to the python treeswift package and versatile for further analysis.
 3. Read in function for observed data from a tsv file or string.
 4. Function to assign branch lengths based on a Poisson distribution with mean of a given mutation rate 
-5.  Function to do averaging across the branch lengths of the tree before summary statistics
+5.  Function to do averaging across the branch lengths of the tree before summary statistics (ultrametric transformation)
 
 ## Description of the code
 #### Master Simulator Function that includes running the following:
@@ -32,7 +33,7 @@ Step 5:  Function that assigns edge lengths to the simulated tree based on a Poi
 
 Step 6:  Function that calculates the Lineage Through Time plots and statistics for a simulated tree
 
-Step 7: function that reads in the observed data in a treeswift tree and returns Lineage Through Time plots and statistics
+Step 7: Function that reads in the observed data in a treeswift tree and returns Lineage Through Time plots and statistics
 
 ### Dependencies
 
@@ -61,7 +62,7 @@ obs_tree.ltt()
 ## Example Observed Data Tree from MPN patient Van Egeren, D. et al. (2021) ‘Reconstructing the Lineage Histories and Differentiation Trajectories of Individual Cancer Cells in Myeloproliferative Neoplasms’, Cell stem cell
 <img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/example_results/ET2.png" alt="Patient with ET" width="80%">
 
-
+The method can provides a distance metric between the simulated and the observed data, so its ideal for simulation for Approximate Bayesian Rejection scheme.
 ## Approximate Bayesian Computation Using ClonalSim
 
 <img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/clonalsim_framew.png" alt="ClonalSim ABC Framework" width="80%">
