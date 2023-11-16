@@ -9,7 +9,7 @@ Moreover ClonalSim can turn an array or matrix straight a python Tree object wit
 
 ### NOTE: Currently ClonalSim is under-development for other user usage and its used for research only by the Cortes-Ciriano lab. An upgrade is coming soon with add ons.
 
-# Simulations with different fitness
+## Simulations with different fitness
 
 <img src="https://github.com/cortes-ciriano-lab/ColoSim/blob/main/figure_clonalsim.png" alt="" width="80%">
 
